@@ -1,8 +1,24 @@
-import qupath.ext.biop.cellpose.Cellpose2D
+/* Last tested on QuPath-0.3.2
+ * 
+ * This scripts requires qupath-extension-cellpose 
+ * cf https://github.com/BIOP/qupath-extension-cellpose
+ */
+
+// some qp that we need to detect objects and measure them
+def imageData  = getCurrentImageData()
+def server = getCurrentServer()
+def cal = server.getPixelCalibration()
+def downsample = 1.0
+
+// if nothing Annotation is selected , let's create a full image annotation
+def pathObjects = getSelectedObjects()
+if (pathObjects.isEmpty()) {
+    createSelectAllObject(true)
+}
 
 clearDetections()
 
-// Specify the model name (cyto, nuc, cyto2, omni_bact or a path to your custom model)
+// Createa Cellpose detectors for cyto and nuclei
 def pathModel_cyto = 'cyto2'
 def cellpose_cyto = Cellpose2D.builder( pathModel_cyto )
         .channels("HCS","DAPI")
@@ -21,25 +37,21 @@ def cellpose_nuc = Cellpose2D.builder( pathModel_nuc )
         .useGPU()
         .build()
 
-
-// Run detection for the selected objects
-def imageData = getCurrentImageData()
-def pathObjects = getSelectedObjects()
-if (pathObjects.isEmpty()) {
-    createSelectAllObject(true)
-}
-
+// Run detection for the selected pathObjects and store resulting detections
 cellpose_cyto.detectObjects(imageData, pathObjects)
 cytos = getDetectionObjects()
-//cytos.each{ it.setPathClass(getPathClass("Cyto"))}
-
 cellpose_nuc.detectObjects(imageData, pathObjects)
 nucs = getDetectionObjects()
+//if one wants to check how each step is doing, uncomment the 4 lines below
+//cytos.each{ it.setPathClass(getPathClass("Cyto"))}
 //nucs.each{ it.setPathClass(getPathClass("Nuc"))}
+//addObjects(cytos) // needed because cellpose detectors remove existing detections
+//return
 
+// make sure to clear everything 
 clearDetections()
 
-// Combine cytos detections and nuclei detections to create cell objects
+// Combine cytos and nuclei detections to create cell objects
 // (we simply check that the nuclei center is inside the cell center) 
 cells = []
 cytos.each{ cyto ->
@@ -49,26 +61,23 @@ cytos.each{ cyto ->
         }
     }
 }
-
 addObjects(cells)
-// adapted from : https://forum.image.sc/t/transferring-segmentation-predictions-from-custom-masks-to-qupath/43408/12
-def server = getCurrentServer()
-def downsample = 1.0
-def cal = server.getPixelCalibration()
 
+// Intensity & Shape Measurements
+// adapted from : https://forum.image.sc/t/transferring-segmentation-predictions-from-custom-masks-to-qupath/43408/12
 def measurements = ObjectMeasurements.Measurements.values() as List
 def compartments = ObjectMeasurements.Compartments.values() as List // Won't mean much if they aren't cells...
 def shape = ObjectMeasurements.ShapeFeatures.values() as List
-
 def cells = getCellObjects()
-
-// Intensity & Shape Measurements
 for ( cell in cells) {
     ObjectMeasurements.addIntensityMeasurements( server, cell, downsample, measurements, compartments )
     ObjectMeasurements.addCellShapeMeasurements( cell, cal,  shape )
 }
-
 fireHierarchyUpdate()
 println 'Done!'
 
+/*
+ * imports
+ */
+import qupath.ext.biop.cellpose.Cellpose2D
 import qupath.lib.analysis.features.ObjectMeasurements
