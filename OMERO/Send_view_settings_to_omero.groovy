@@ -10,6 +10,9 @@ import qupath.lib.scripting.QP
  *  - The connection to omero-server.epfl.ch needs to be established (with credentials) before running the script
  *  - The current image should have been imported from OMERO.
  *  
+ * = TO MAKE THE SCRIPT RUN =
+ *  - If you want to see the effect of this script, you need to have different view settings from OMERO (channel color, name or range)
+ *  
  * = AUTHOR INFORMATION =
  * Code written by Rémy Dornier, EPFL - SV -PTECH - BIOP 
  * 03.11.2022

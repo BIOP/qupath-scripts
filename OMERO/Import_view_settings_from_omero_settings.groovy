@@ -6,9 +6,13 @@ import qupath.lib.scripting.QP
  *  - qupath-extension-biop-omero - latest version : https://github.com/BIOP/qupath-extension-biop-omero/releases
  *
  * = REQUIREMENTS =
- *  - A project must be open in QuPath
- *  - The connection to omero-server.epfl.ch needs to be established (with credentials) before running the script
+ *  - A project must be open in QuPath.
+ *  - The connection to omero-server.epfl.ch needs to be established (with credentials) before running the script.
  *  - The current image should have been imported from OMERO.
+ *  
+ * = TO MAKE THE SCRIPT RUN =
+ *  - Change view settings on OMERO (channel color and min/max value for example) and save these settings.
+ *  - run the script.
  *  
  * = AUTHOR INFORMATION =
  * Code written by Rémy Dornier, EPFL - SV -PTECH - BIOP 

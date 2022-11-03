@@ -8,6 +8,11 @@ import qupath.lib.scripting.QP
  * = REQUIREMENTS =
  *  - A project must be open in QuPath
  *  - The connection to omero-server.epfl.ch needs to be established (with credentials) before running the script
+ *  - The current image should have been imported from OMERO.
+ *  
+ * = TO MAKE THE SCRIPT RUN =
+ *  - You need to have some annotations and/or detections on the current image. If it is not the case, create some. 
+ *  - Run the script.
  *  
  * = AUTHOR INFORMATION =
  * Code written by Rémy Dornier, EPFL - SV -PTECH - BIOP 
@@ -32,6 +37,10 @@ import qupath.lib.scripting.QP
  * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, 
  * STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF 
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * 
+ * History
+ *  - 2022-11-03 : update documentation 
+ * 
 */
 
 
