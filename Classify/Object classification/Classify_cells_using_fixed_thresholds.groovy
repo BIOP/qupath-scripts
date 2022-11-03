@@ -1,6 +1,6 @@
 // This script assumes that you have run a QuPath StarDist detection and have cell objects in your currently open image
 
-
+// Please change the measurement name
 // Define multimeasurements you wish to use. You can add as many as you want as follows: 
 // [new SingleMeasurement (...), SingleMeasurement(...), SingleMeasurement(...), ...]
 
