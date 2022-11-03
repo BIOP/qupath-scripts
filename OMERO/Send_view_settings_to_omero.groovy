@@ -8,10 +8,11 @@ import qupath.lib.scripting.QP
  * = REQUIREMENTS =
  *  - A project must be open in QuPath
  *  - The connection to omero-server.epfl.ch needs to be established (with credentials) before running the script
+ *  - The current image should have been imported from OMERO.
  *  
  * = AUTHOR INFORMATION =
  * Code written by Rémy Dornier, EPFL - SV -PTECH - BIOP 
- * 20.10.2022
+ * 03.11.2022
  * 
  * = COPYRIGHT =
  * © All rights reserved. ECOLE POLYTECHNIQUE FEDERALE DE LAUSANNE, Switzerland, BioImaging And Optics Platform (BIOP), 2022
@@ -37,7 +38,8 @@ import qupath.lib.scripting.QP
 
 
 /**
- * Import tags attached to the current opened image from OMERO, 
+ * Send image view settings to OMERO based on QuPath channels settings.
+ * View settings : channel display range, color and name
  * 
  **/
  
@@ -46,15 +48,26 @@ ImageServer<?> server = QP.getCurrentServer()
 
 // check if the current server is an OMERO server. If not, throw an error
 if(!(server instanceof OmeroRawImageServer)){
-	Dialogs.showErrorMessage("Tag importation","Your image is not from OMERO ; please use an image that comes from OMERO to use this script");
+	Dialogs.showErrorMessage("Channel view settings","Your image is not from OMERO ; please use an image that comes from OMERO to use this script");
 	return
 }
 
-// import tags from OMERO
-List<String> tags = OmeroRawScripting.importOmeroTags(server)
-tags.each{println it}
+
+// set channels display range
+boolean rangesWereSent = OmeroRawScripting.sendChannelsDisplayRangeToOmero(server)
+
+// set channels color
+boolean colorsWereSent = OmeroRawScripting.sendChannelsColorToOmero(server)
+
+// set channels name
+boolean namesWereSent = OmeroRawScripting.sendChannelsNameToOmero(server)
+
 
 // display success
-println "Tag(s) successfully imported from OMERO \n"
+if(rangesWereSent && colorsWereSent && namesWereSent)
+	println "View settings successfully sent to OMERO"
+else
+	println "An issue occurs when trying to send QuPath view settings to OMERO"
+
 
 
