@@ -1,6 +1,17 @@
-// Short Script to import relative projects from QuPath 0.1.4
-// A Method using File > Project > Import images from v0.1.2 is available here
-// 
+/*
+ * Short Script to import relative projects from QuPath 0.1.4
+ * If you do not nave relative paths, use 
+ * File > Project > Import images from v0.1.2
+ *
+ * @author Olivier Burri
+ * 
+ * Last tested with QuPath 0.2.x
+ */
+
+import qupath.lib.gui.commands.*
+import qupath.lib.gui.dialogs.Dialogs
+import org.apache.commons.io.FileUtils
+
 
 def qupath = getQuPath()
 def new_project = qupath.getProject()
@@ -70,7 +81,3 @@ try {
     qupath.refreshProject()
     
 println "Old project imported. Please make sure to copy any custom files or folders from your old project manually!"
-
-import qupath.lib.gui.commands.*
-import qupath.lib.gui.dialogs.Dialogs
-import org.apache.commons.io.FileUtils

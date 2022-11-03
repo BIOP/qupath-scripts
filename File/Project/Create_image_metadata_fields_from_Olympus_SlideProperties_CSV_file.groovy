@@ -1,17 +1,32 @@
+/* 
+ * Creates metadata fields for each image entry in the current project
+ * based on the "SlideName" column in an Olympus 'SlideProperties' .csv file
+ * If an entry's name matches the given column, all the values in that row's column are appended
+ * to the image entry. 
+ * 
+ * @author Olivier Burri
+ * @date 20221103
+ */
+ 
+ 
+def csvFile = Dialogs.promptForFile( "Olympus SlideProperties File", null," *.csv", ".csv" )
+
+// Start of script 
 
 def first = true
 def keys = []
 def allMetadata = []
 
-def csvFile = Dialogs.promptForFile( "Olympus SlideProperties File", null," *.csv", ".csv" )
-
+// We are parsing the file manually and expect it to be separated with tabs
 csvFile.splitEachLine("\t") { fields ->
     
+    // First row, here are the column names
     if(first) {
         keys = fields
         first=false
      
     } else {
+        // Not the first row, these are the values, which we add to a map
         def metadataMap = new HashMap<String, String>()
         fields.eachWithIndex{ f,i  ->
             metadataMap.put(keys[i], f)
@@ -23,11 +38,14 @@ csvFile.splitEachLine("\t") { fields ->
 // Add these to the project
 def project = getProject()
 
+// Add these to the entries whose names match the SlideName column
 project.getImageList().each { entry ->
     def name = entry.getImageName()
+    
     allMetadata.each{ line ->
         if (line.keySet().contains("SlideName") ){
             if (name.contains line['SlideName']) {
+
                 // Add metadata here
                 line.each{ key, value ->
                     entry.putMetadataValue(key, value)
