@@ -11,7 +11,7 @@
  */
 
 // What is the extension of images being converted? For filtering the input folder
-def imageExtension = "nd2"
+def imageExtension = "ndpi"
 
 // Start of Script 
 
@@ -47,11 +47,11 @@ fileList.each{ file ->
 						.redirectOutput(outputFile)
 		
     
-    println "Running Command: &{pb.command()}"
+    println "Running Command: ${pb.command()}"
     def process = pb.start()
-    pb.waitFor()
+    process.waitFor()
     // Destroy explicitely
-    pb.destroy()
+    process.destroy()
 }
 
 println "Script Done"

@@ -8,7 +8,7 @@ They are intended for use with the latest version of QuPath and perhaps require 
 Under `QuPath` folder, you will find scripts to get an instance of OMERO and communicate with it.
 
 ### Dependencies and installation
-To make scripts work, you will need three dependcies : 
+To make scripts work, you will need three dependencies : 
 - [simple-omero-client](https://github.com/GReD-Clermont/simple-omero-client)
 - [qupath-extension-biop-omero](https://github.com/BIOP/qupath-extension-biop-omero)
 - [OMERO.java](https://www.openmicroscopy.org/omero/downloads/)
@@ -22,5 +22,5 @@ For the last two dependencies, look at the readme of [qupath-extension-biop-omer
 - Before running any script, you will need to have an image, coming from OMERO, open in QuPath.
 - On QuPath, go under `Automate -> Shared script -> OMERO`.
 - Click on the script you want.
-- Read the small header to know what should be configured on the image to make the script run.
+- Read the small headers `= REQUIREMENTS =` and `= TO MAKE THE SCRIPT RUN =` to know what should be configured on the image to make the script run.
 - Click on `run->run`.

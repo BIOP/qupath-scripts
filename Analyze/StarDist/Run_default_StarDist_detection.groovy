@@ -4,7 +4,7 @@ import qupath.tensorflow.stardist.StarDist2D
 
 // Specify the model directory (you will need to change this!)
 //def pathModel = 'Z:\\public\\0 - BIOP Data\\StarDist Models\\silvia_rat_brain_deconvolved_usr_augment_r32_p256_g2_e400_se100_b8_aug_challenge'
-def pathModel = 'C:\\Users\\oburri\\Desktop\\he_heavy_augment'
+def pathModel = 'C:\\Users\\oburri\\Desktop\\he_heavy_augment.pb'
 
 
 def stardist = StarDist2D.builder(pathModel)
