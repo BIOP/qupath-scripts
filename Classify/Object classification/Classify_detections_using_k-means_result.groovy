@@ -6,18 +6,26 @@
  * Date: 2022.11.18
  */
 
-def measurements = ["Solidity"]
+def measurements = ['Solidity', 'Max diameter µm']
 def names = ["A", "B", "C"]
-def centroids = [[0.7414517393468115],[0.8920453087112608],[0.9939777434386593]]
+def centroids = [[-2.8606701475127583, -0.32797788935118627], [0.26932692767541283, 0.976571888297062], [0.25961464207840873, -0.7220892952523503]]
+def doNorm = true
 
 // Start of script
 def detections = getDetectionObjects()
 def distanceFunction = new EuclideanDistance()
 
-def values = detections.collect{ detection ->
-    new DoublePoint( measurements.collect{ m -> detection.getMeasurementList().getMeasurementValue( m ) } as double[] )
+// Collect and normalize
+def allValues = measurements.collect{ m ->
+    detections.collect{ d -> d.getMeasurementList().getMeasurementValue( m ) } as double[]
 }
 
+// Perform Normalization
+if ( doNorm ) allValues = allValues.collect{ StatUtils.normalize( it ) }
+
+def values = (0 ..< detections.size()).collect{ j ->
+    new DoublePoint( (0 ..< allValues.size() ).collect { i -> allValues[i][j] } as double[] )
+}
 
 // Build a hashmap to find which centroid has which name
 def map = new LinkedHashMap<ArrayList<Double>, String>( centroids.size() )
@@ -34,3 +42,4 @@ def map = new LinkedHashMap<ArrayList<Double>, String>( centroids.size() )
 
 import org.apache.commons.math3.ml.clustering.DoublePoint
 import org.apache.commons.math3.ml.distance.EuclideanDistance
+import org.apache.commons.math3.stat.StatUtils
