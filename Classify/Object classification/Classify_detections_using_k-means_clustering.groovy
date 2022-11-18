@@ -4,17 +4,16 @@
  * While this example is in 1D, you can create classifiers in ND
  * Because the K-means will give us the centroids, we choose the separating thresholds as 
  * the half-distance between the centroids
- * NOTE: No normalization is done, that's up to you
  *
  * @author Olivier Burri
  * Date: 2022.11.18
  */
 
-def measurements = ["Solidity"]
+def measurements = ["Solidity","Max diameter µm"]
 def k = 3
-def names = ["A", "B", "C"] // Arbitrary, and cannot be ordered if the clustering vector has more than 2 dimensions
+def names = ["A", "B", "C"] // Arbitrary, and will not be ordered if the clustering vector has more than 2 dimensions
 def detections = getDetectionObjects()
-
+def doNorm = true
 
 // Start of script
 def maxIterations = 5000
@@ -22,15 +21,20 @@ def distanceFunction = new EuclideanDistance()
 def randomGenerator = new JDKRandomGenerator()
 def emptyClusterStrategy = KMeansPlusPlusClusterer.EmptyClusterStrategy.ERROR
 
-
-
 def kmeans = new KMeansPlusPlusClusterer( k, maxIterations, distanceFunction, randomGenerator, emptyClusterStrategy )
 
-
-def values = detections.collect{ detection ->
-    new DoublePoint( measurements.collect{ m -> detection.getMeasurementList().getMeasurementValue( m ) } as double[] )
+// Collect and normalize
+def allValues = measurements.collect{ m ->
+    detections.collect{ d -> d.getMeasurementList().getMeasurementValue( m ) } as double[]
 }
 
+// Perform Normalization
+if ( doNorm ) allValues = allValues.collect{ StatUtils.normalize( it ) }
+
+def values = (0 ..< detections.size()).collect{ j ->
+    new DoublePoint( (0 ..< allValues.size() ).collect { i -> allValues[i][j] } as double[] )
+}
+        
 // Get the centroids and assign the objects
 def centroids = kmeans.cluster( values )
 
@@ -51,9 +55,11 @@ def map = new LinkedHashMap<CentroidCluster, String>( centroids.size() )
 }
 
 // Print the result
-println "Perfomed K-Means clustering using [${measurements.join(',')}] with $k clusters"
-println "Resulting clusters:"
-map.each{ println "Cluster center ${it.getKey().getCenter()} as Class ${it.getValue()}" }
+println "Perfomed K-Means clustering"
+println "Normalization:\n\t\t$doNorm"
+println "Measurements: \n\t\t["+ measurements.collect{ '\'' + it + '\''}.join(', ') + "]"
+println "Resulting cluster centers:\n\t\t[" + map.keySet().collect{ it.getCenter() }.join(', ') +"]"
+
 fireHierarchyUpdate()
 
 import org.apache.commons.math3.ml.clustering.KMeansPlusPlusClusterer
@@ -61,3 +67,4 @@ import org.apache.commons.math3.ml.clustering.DoublePoint
 import org.apache.commons.math3.ml.clustering.CentroidCluster
 import org.apache.commons.math3.ml.distance.EuclideanDistance
 import org.apache.commons.math3.random.JDKRandomGenerator
+import org.apache.commons.math3.stat.StatUtils
