@@ -44,7 +44,6 @@ import qupath.lib.scripting.QP
 */
 
 
-
 /**
  * There is many implementations to send pathObjects to OMERO : 
  * 
