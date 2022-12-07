@@ -3,7 +3,7 @@
  * 
  * @author Olivier Burri
  * @date 20221207
- * Last tested on QuPath-0.4 (RG)
+ * Last tested on QuPath-0.4 (RG 20221207)
  * 
  * Requires at least 1 annotation and cells in it 
  * 
