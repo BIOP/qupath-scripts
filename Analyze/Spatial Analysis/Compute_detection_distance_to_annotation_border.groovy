@@ -2,8 +2,11 @@
  * Get the distance of each detection to its parent's edge
  * 
  * @author Olivier Burri
- * @date 202211009
- * Last tested on QuPath-0.3.2
+ * @date 20221207
+ * Last tested on QuPath-0.4 (RG)
+ * 
+ * Requires at least 1 annotation and cells in it 
+ * 
  */
  
 def annotations = getAnnotationObjects()
