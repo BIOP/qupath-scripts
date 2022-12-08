@@ -1,4 +1,7 @@
-import qupath.ext.stardist.StarDist2D
+/*
+ * Tested on QuPath 0.4.0, 2022.12.08 (RG)
+ */
+ import qupath.ext.stardist.StarDist2D
 
 // Specify the model file (you will need to change this!)
 //var pathModel = 'C:/QuPath_Common_Data_0.3/models/he_heavy_augment.pb'
