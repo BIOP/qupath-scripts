@@ -4,8 +4,8 @@
  import qupath.ext.stardist.StarDist2D
 
 // Specify the model file (you will need to change this!)
-//var pathModel = 'C:/QuPath_Common_Data_0.3/models/he_heavy_augment.pb'
-var pathModel = 'C:/QuPath_Common_Data_0.3/models/dsb2018_heavy_augment.pb'
+//var pathModel = 'C:/QuPath_Common_Data_0.4/models/he_heavy_augment.pb'
+var pathModel = 'C:/QuPath_Common_Data_0.4/models/dsb2018_heavy_augment.pb'
 
 // Get current image - assumed to have color deconvolution stains set
 var imageData = getCurrentImageData()
