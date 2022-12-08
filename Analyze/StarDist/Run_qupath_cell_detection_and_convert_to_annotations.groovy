@@ -7,6 +7,11 @@
  *
  * @author Olivier Burri
  * Date: 2020.09.15
+ * 
+ * 
+ * Tested on QuPath 0.4.0, 2022.12.08 (RG)
+ *
+ * 
  */
 
 clearDetections()
@@ -16,8 +21,7 @@ def toDelete = getAllObjects().findAll{ !(it.getROI() instanceof RectangleROI ) 
 removeObjects( toDelete, false )
 
 // Put the cell detection script between the accolades {}
-cellDetection = { runPlugin('qupath.imagej.detect.cells.WatershedCellDetection', '{"detectionImage": "DAPI",  "requestedPixelSizeMicrons": 0.1302,  "backgroundRadiusMicrons": 5.0,  "medianRadiusMicrons": 0.0,  "sigmaMicrons": 2.4,  "minAreaMicrons": 40.0,  "maxAreaMicrons": 1000.0,  "threshold": 1600.0,  "watershedPostProcess": true,  "cellExpansionMicrons": 1.1,  "includeNuclei": true,  "smoothBoundaries": true,  "makeMeasurements": true}'); }
-
+cellDetection = { runPlugin('qupath.imagej.detect.cells.WatershedCellDetection', '{"detectionImage":"DAPI","requestedPixelSizeMicrons":0.5,"backgroundRadiusMicrons":8.0,"backgroundByReconstruction":true,"medianRadiusMicrons":0.0,"sigmaMicrons":1.5,"minAreaMicrons":10.0,"maxAreaMicrons":400.0,"threshold":25.0,"watershedPostProcess":true,"cellExpansionMicrons":1.0,"includeNuclei":true,"smoothBoundaries":true,"makeMeasurements":true}') }
 // Script starts below
 
 // Select all annotations, ideally 
