@@ -1,6 +1,6 @@
 /* Last tested on QuPath-0.3.2
  * 
-* REQUIREMENTS
+ * REQUIREMENTS
  * ============
  * You need the QuPath Cellpose Extension installed
  *   https://github.com/BIOP/qupath-extension-cellpose

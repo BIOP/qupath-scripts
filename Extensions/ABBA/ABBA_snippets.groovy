@@ -1,3 +1,18 @@
+/**
+ * REQUIREMENTS
+ * ============
+ * You need to:
+ *  - have the QuPath ABBA Extension installed (https://github.com/BIOP/qupath-extension-abba)
+ *  - have an opened image which has been registered with ABBA (https://biop.github.io/ijp-imagetoatlas/)
+ *  - have exported the registration result of the image in ABBA (in Fiji)
+ *  - have some cells already detected on this opened image
+ *
+ * TODO : Display a warning message if several atlases are found (Allen v3 and Allen v3.1)	
+ *
+ * This script is not supposed to work in one block. Just copy paste in another script the parts you need
+ */
+
+
 // See forum post https://forum.image.sc/t/qupath-script-to-restrict-cell-detection-to-several-sub-regions-of-the-brain/71707/3 for images
 
 // 1. To clear all objects (take care, it also clear cells (detection objects)!)

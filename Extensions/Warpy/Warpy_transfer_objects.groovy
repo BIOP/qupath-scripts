@@ -1,3 +1,14 @@
+/**
+ * REQUIREMENTS
+ * ============
+ * You need to:
+ *  - have the QuPath Warpy Extension installed (https://github.com/BIOP/qupath-extension-warpy)
+ *  - have an opened image which has been registered with Warpy (https://imagej.net/plugins/bdv/warpy/warpy)
+ *  - have some objects detected on the moving or fixed image, then have the other image opened
+ *
+ * This script then transfer all objects from the moving to the fixed image (or vice versa)
+ */
+
 // Transfer PathObjects from another image that contains a serialized RealTransform
 // result from Warpy
 

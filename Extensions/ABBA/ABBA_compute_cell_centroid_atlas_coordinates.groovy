@@ -1,6 +1,16 @@
 /**
- * Computes the centroid coordinates of each detection within the atlas
- * then adds these coordinates onto the measurement list.
+ * REQUIREMENTS
+ * ============
+ * You need to:
+ *  - have the QuPath ABBA Extension installed (https://github.com/BIOP/qupath-extension-abba)
+ *  - have an opened image which has been registered with ABBA (https://biop.github.io/ijp-imagetoatlas/)
+ *  - have exported the registration result of the image in ABBA (in Fiji)
+ *  - have some cells already detected on this opened image
+ *
+ * TODO : Display a warning message if several atlases are found (Allen v3 and Allen v3.1)	
+ *
+ * This script then computes the centroid coordinates of each detection within the atlas
+ * and adds these coordinates onto the measurement list.
  * Measurements names: "Atlas_X", "Atlas_Y", "Atlas_Z"
  */
 
