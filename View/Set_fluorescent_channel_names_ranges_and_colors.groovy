@@ -5,7 +5,9 @@
  *
  * @author Olivier Burri
  * @date 20221103
- * Last tested on QuPath-0.3.2
+ * 
+ * Tested on QuPath 0.4.0, 2022.12.08 (RG)
+ * 
  */
  
 setImageType('FLUORESCENCE')
@@ -13,20 +15,21 @@ setImageType('FLUORESCENCE')
 // You can replace the names with your stainings if you want
 
 // Channel names in order
-def names = ['DAPI', 'FITC', 'CY3', 'CY5']
+def names = ['DAPI', 'FITC', 'CY3', 'CY5',"CY7"]
 
 // Channel minimum display values, in order
-def mins = [ 0, 0, 0, 0 ]
+def mins = [ 0, 0, 0, 0 , 0]
 
 // Channel maximum display values, in order
-def maxs = [ 8000, 7500, 6000, 820 ]
+def maxs = [ 255, 255, 255, 255,255 ]
 
 // Channel colors: Make sure that the number of colors in this list
 // matches the number of channels
 def colors = [ getColorRGB( 0, 128, 255 ),
                getColorRGB( 0, 255, 128 ),
-               getColorRGB( 128, 255, 0 ),
-               getColorRGB( 255, 0, 128 )
+               getColorRGB( 255, 128, 0 ),
+               getColorRGB( 255, 0, 128 ),
+               getColorRGB( 128, 0, 255 )
              ]
 
 
