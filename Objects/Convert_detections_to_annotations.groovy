@@ -5,7 +5,7 @@
 def cells = getDetectionObjects()
 
 def annots = cells.collect{ cell ->
-    return PathObjects.createAnnotationObject( cell.getROI() )
+    return PathObjects.createAnnotationObject( cell.getROI(), cell.getPathClass() )
     }
 clearDetections()
 

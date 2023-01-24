@@ -10,6 +10,7 @@
  * 
  * All builder options are at 
  * https://biop.github.io/qupath-extension-cellpose/qupath/ext/biop/cellpose/CellposeBuilder.html
+ * Last tested on QuPath-0.4.0
  */
 
 
@@ -20,9 +21,7 @@ def cellpose = Cellpose2D.builder( "cyto2" ) // Can choose "None" if you want to
                 .epochs( 500 )              // Optional: will default to 500
                 .learningRate( 0.2 )        // Optional: Will default to 0.2
                 .batchSize( 8 )             // Optional: Will default to 8
-                .useGPU()                 // Optional: Use the GPU if configured, defaults to CPU only
 //                .modelDirectory( new File( "My/location" ) ) // Optional place to store resulting model. Will default to QuPath project root, and make a 'models' folder 
-                .saveBuilder( "My Builder" ) // Save the builder in the model Directory, so you can reuse it later
                 .build()
 
 // Once ready for training you can call the train() method

@@ -2,7 +2,7 @@
  * See 
  * https://qupath.readthedocs.io/en/stable/docs/advanced/exporting_images.html
  * for more examples
- * 
+ * Last tested on QuPath-0.4.0
  * @author Olivier Burri
  * Date: 2020.10.29
  */
