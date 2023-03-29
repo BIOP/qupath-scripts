@@ -4,8 +4,8 @@
  * All objects & metadata in the source images should be imported into the destination images. 
  *
  * @author Olivier Burri & Remy Dornier
- * @date 2023-01-20
- * Last tested on QuPath-0.4.1
+ * @date 2023-03-29
+ * Last tested on QuPath-0.4.3
  */
  
  
@@ -92,8 +92,8 @@ PathObject transformObject( def pathObject, boolean copyMeasurements ) {
     def newObject = PathObjectTools.transformObject(pathObject, null, copyMeasurements)
     if ( pathObject.getName() != null ) newObject.setName( pathObject.getName() )
     // Handle child objects
-    if ( pathObject.hasChildren() ) {
-        newObject.addPathObjects(pathObject.getChildObjects().collect{ transformObject( it, copyMeasurements ) } )
+    if ( pathObject.hasChildObjects() ) {
+        newObject.addChildObjects(pathObject.getChildObjects().collect{ transformObject( it, copyMeasurements ) } )
     }
     return newObject
 }
