@@ -2,9 +2,17 @@
  * Transfer all objects & metadata from another QuPath project, matching images name to set objects to the 
  * correct image.
  * All objects & metadata in the source images should be imported into the destination images. 
+ * 
+ * Step by step tuto
+ * 1. Open the project containing images coming from OMERO
+ * 2. Open this script
+ * 3. Change the "localProjectPath" variable with the path to your qp project containing local images
+ * 4. Run the script
+ * 
+ * 5. For MAC users, if your project is located on a server, then the path should begin with /Volumes/...
  *
  * @author Olivier Burri & Remy Dornier
- * @date 2023-03-29
+ * @date 2023-04-05
  * Last tested on QuPath-0.4.3
  */
  
@@ -15,12 +23,12 @@
  * 
  * **********************************************************/
  
-// Remove objects from the active ImageEntry or keep it as is, and just add?
+// Remove objects from the active OMERO ImageEntry or keep it as is, and just add?
 def deleteExisting = true
 
-// The other project that has the annotations. 
-// It should have an image with the SAME NAME as the one currently open in QuPath.
-def omeroProject = "D:\\Remy\\QuPath\\Migration Local-OMERO\\LocalProject\\project.qpproj"
+// The local project path that has the annotations. 
+// Image name in the local project must match the ones in the OMERO project
+def localProjectPath = "D:\\Remy\\QuPath\\Migration Local-OMERO\\LocalProject\\project.qpproj"
 
 
 /*************************************************************
@@ -30,18 +38,17 @@ def omeroProject = "D:\\Remy\\QuPath\\Migration Local-OMERO\\LocalProject\\proje
  * **********************************************************/
 
 
-
-// Get the project & the requested image name
-def project = ProjectIO.loadProject(new File(omeroProject), BufferedImage.class)
+// Get the local project
+def localProject = ProjectIO.loadProject(new File(localProjectPath), BufferedImage.class)
 
 //START OF SCRIPT
 getProject().getImageList().each { omeroImage->
-    // get the name of theimage comming from omero
+    // get the name of the image comming from OMERO
     def name = omeroImage.getImageName()
     def omeroShorterName = name.replace(" ","").replace("-","").replace("[","").replace("]","")
     
     // open QuPath project with local images
-    def localEntry = project.getImageList().find { it.getImageName().replace(" ","").replace("-","").replace("[","").replace("]","").equals( omeroShorterName ) }
+    def localEntry = localProject.getImageList().find { it.getImageName().replace(" ","").replace("-","").replace("[","").replace("]","").equals( omeroShorterName ) }
     if ( localEntry == null ) {
         println 'Could not find image with name ' + name
         return
