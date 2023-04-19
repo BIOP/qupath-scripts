@@ -1,5 +1,6 @@
 import qupath.ext.biop.servers.omero.raw.*
 import qupath.lib.scripting.QP
+import omero.gateway.model.DatasetData;
 
 /*
  * = DEPENDENCIES =
@@ -11,11 +12,11 @@ import qupath.lib.scripting.QP
  *  - The current image should have been imported from OMERO.
  *  
  * = TO MAKE THE SCRIPT RUN =
- *  - If no key-values are attached to your image on OMERO, you can add a key-value and then run the script.
+ *  - Should run like this :)
  *  
  * = AUTHOR INFORMATION =
  * Code written by Rémy Dornier, EPFL - SV -PTECH - BIOP 
- * 20.10.2022
+ * 11.03.2023
  * 
  * = COPYRIGHT =
  * © All rights reserved. ECOLE POLYTECHNIQUE FEDERALE DE LAUSANNE, Switzerland, BioImaging And Optics Platform (BIOP), 2022
@@ -38,15 +39,13 @@ import qupath.lib.scripting.QP
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * 
  * History
- *  - 2022-11-03 : update documentation
+ *  - 2023-04-19 : update for HCS data
  *  
 */
 
 
 /**
- * Import key value pairs to qupath from OMERO as metadata, 
- * attached to the current opened image.
- * 
+ * Add image hierarchy (project/dataset or screen/plate/well) as qp metadata fields
  **/
  
  
@@ -60,31 +59,49 @@ for (entry in qpproject.getImageList()) {
     // check if the current server is an OMERO server. If not, throw an error
     if((server instanceof OmeroRawImageServer)){
         
-        def datasetList = OmeroRawTools.getParent(server.getClient(), "Image", server.getId())
-        if(datasetList.size() > 0){
-            def dataset = datasetList.get(0)
-            datasetName = dataset.getName()
+        // get the parent container
+        def parentList = OmeroRawTools.getParent(server.getClient(), "Image", server.getId())
+        if(parentList.size() > 0){
+            def parent = parentList.get(0)
             
-            def projectList = OmeroRawTools.getParent(server.getClient(), "Dataset", dataset.getId())
-            if(projectList.size() > 0){
-                def project = projectList.get(0)
-                projectName = project.getName()
-            }
-               else
-                   projectName = "None"
+            // if parent is a dataset
+            if(parent instanceof DatasetData) {
+                entry.putMetadataValue("Dataset", parent.getName());
             
-        }else
-            datasetName = "None"
-        
-        entry.putMetadataValue("Dataset", datasetName);
-        entry.putMetadataValue("Project", projectName);
-    }
+                // get parent project
+                def projectList = OmeroRawTools.getParent(server.getClient(), "Dataset", parent.getId())
+                if(projectList.size() > 0){
+                    def project = projectList.get(0)
+                    entry.putMetadataValue("Project", project.getName());
+                }
+                   
+            } else {
+                // if the parent is a well
+                def wellName = "" + (char)(parent.getRow() + 65) + (parent.getColumn() < 9 ? ""+ 0 + (parent.getColumn() + 1) : ""+(parent.getColumn() + 1))
+                entry.putMetadataValue("Well", wellName);
+                
+                // get the parent plate
+                def plateList = OmeroRawTools.getParent(server.getClient(), "Well", parent.getId())
+                if(plateList.size() > 0){
+                    def plate = plateList.get(0)
 
+                    entry.putMetadataValue("Plate", plate.getName());
+                    
+                    // get the parent screen
+                    def screenList = OmeroRawTools.getParent(server.getClient(), "Plate", plate.getId())
+                    
+                    if(screenList.size() > 0){
+                        def screen = screenList.get(0)
+                        entry.putMetadataValue("Screen", screen.getName());
+                    }
+                }
+            } 
+        }
+        
+        println "The current image "+server.getId()+" has been processed \n"
+    }
 }
  
-
-
-
 // display success
 println "Metadata imported and updated in QuPath \n"
 

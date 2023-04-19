@@ -44,6 +44,7 @@ import qupath.lib.gui.measure.ObservableMeasurementTableData;
  * 
  * History
  *  - 2022-11-03 : update documentation 
+ *  - 2023-04-19 : add file deletion and update documentation
  * 
 */
 
@@ -55,9 +56,16 @@ import qupath.lib.gui.measure.ObservableMeasurementTableData;
  * 		1. sendDetectionMeasurementTable(pathObjects, server, image_data) ==> send measurement table with only the specified pathObjects 
  * 		2. sendDetectionMeasurementTable(server, image_data) ==> send measurement table with all detections
  * 		
- * 	/// sending a csv file
+ * /// sending a csv file
  * 		1. sendDetectionMeasurementTableAsCSV(pathObjects, server, image_data) ==> send measurement table with only the specified pathObjects 
  * 		2. sendDetectionMeasurementTableAsCSV(server, image_data) ==> send measurement table with all detections
+ * 
+ * /// delete files
+ *              1. deleteDetectionFiles(server)
+ *              2. deleteDetectionFiles(server, fileAnnotationData)
+ * 
+ * /// readOmeroFile
+ *              1. readFilesAttachedToCurrentImageOnOmero(server)
  * 
  */
  
@@ -83,19 +91,51 @@ Collection<PathObject> pathObjects = QP.getDetectionObjects()
 // get image data
 def imageData = QP.getCurrentImageData()
 
-// send the table to OMERO as OMERO.table
-boolean wasSent = OmeroRawScripting.sendDetectionMeasurementTable(pathObjects, server, imageData);
-if(wasSent)
-	println "Detection table sent to OMERO as OMERO.table"
-else
-	println "An issue occurs when trying to send table to OMERO"
+
+/** 
+ *                 Option 1
+ * 1. first, read the files on the current image.
+ * 2. send detection tables
+ * 3. Delete previous file versions
+ **/
+    def files
+    if(deleteTable) {
+        files = OmeroRawScripting.readFilesAttachedToCurrentImageOnOmero(server)
+    }
+    
+    // send the table to OMERO as OMERO.table
+    boolean tableWasSent = OmeroRawScripting.sendDetectionMeasurementTable(pathObjects, server, imageData);
+    boolean csvWasSent = OmeroRawScripting.sendDetectionMeasurementTableAsCSV(pathObjects, server, imageData);
+    
+    if(deleteTable) {
+        OmeroRawScripting.deleteDetectionFiles(server, files)
+    }
+    
+    if(tableWasSent && csvWasSent)
+    	println "Detection table sent to OMERO as OMERO.table"
+    else
+    	println "An issue occurs when trying to send table to OMERO"
 
 
-// send the table to OMERO as csv file
-wasSent = OmeroRawScripting.sendDetectionMeasurementTableAsCSV(pathObjects, server, imageData);
-if(wasSent)
-	println "Detection table sent to OMERO as csv file"
-else
-	println "An issue occurs when trying to send csv file to OMERO"
+
+/** 
+ *                 Option 2
+ * 1. first, delete all annotation and detection files related to the current QuPath project
+ * 2. send annotations and detection tables
+ **/
+    /*if(deleteTable) {
+        OmeroRawScripting.deleteDetectionFiles(server)
+    }
+    
+    // send the table to OMERO as OMERO.table
+    boolean tableWasSent = OmeroRawScripting.sendDetectionMeasurementTable(pathObjects, server, imageData);
+    boolean csvWasSent = OmeroRawScripting.sendDetectionMeasurementTableAsCSV(pathObjects, server, imageData);
+    
+    
+    if(tableWasSent && csvWasSent)
+    	println "Detection table sent to OMERO as OMERO.table"
+    else
+    	println "An issue occurs when trying to send table to OMERO"*/
+
 
 

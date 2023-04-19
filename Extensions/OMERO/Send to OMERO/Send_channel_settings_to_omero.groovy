@@ -11,7 +11,8 @@ import qupath.lib.scripting.QP
  *  - The current image should have been imported from OMERO.
  *  
  * = TO MAKE THE SCRIPT RUN =
- *  - If you want to see the effect of this script, you need to have different view settings from OMERO (channel color, name or range)
+ *  - If you want to see the effect of this script, you need to have different channel settings from OMERO 
+ *    (channel color, name or range) and having renamed your image (i.e different name from OMERO one).
  *  
  * = AUTHOR INFORMATION =
  * Code written by Rémy Dornier, EPFL - SV -PTECH - BIOP 
@@ -36,6 +37,9 @@ import qupath.lib.scripting.QP
  * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, 
  * STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF 
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * 
+ * History
+ * - 2023-04-19 : send image name to OMERO & update documentation
 */
 
 
@@ -51,7 +55,7 @@ ImageServer<?> server = QP.getCurrentServer()
 
 // check if the current server is an OMERO server. If not, throw an error
 if(!(server instanceof OmeroRawImageServer)){
-	Dialogs.showErrorMessage("Channel view settings","Your image is not from OMERO ; please use an image that comes from OMERO to use this script");
+	Dialogs.showErrorMessage("Image & channel settings","Your image is not from OMERO ; please use an image that comes from OMERO to use this script");
 	return
 }
 
@@ -65,12 +69,15 @@ boolean colorsWereSent = OmeroRawScripting.sendChannelsColorToOmero(server)
 // set channels name
 boolean namesWereSent = OmeroRawScripting.sendChannelsNameToOmero(server)
 
+// set image name
+boolean imageNameWereSent = OmeroRawScripting.sendImageNameToOmero(server)
+
 
 // display success
-if(rangesWereSent && colorsWereSent && namesWereSent)
-	println "View settings successfully sent to OMERO"
+if(rangesWereSent && colorsWereSent && namesWereSent && imageNameWereSent)
+	println "Image & channels settings successfully sent to OMERO"
 else
-	println "An issue occurs when trying to send QuPath view settings to OMERO"
+	println "An issue occurs when trying to send QuPath image or channels settings to OMERO"
 
 
 
