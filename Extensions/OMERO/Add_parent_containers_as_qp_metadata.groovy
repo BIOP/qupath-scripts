@@ -40,6 +40,7 @@ import omero.gateway.model.DatasetData;
  * 
  * History
  *  - 2023-04-19 : update for HCS data
+ *  - 2023.07.05 : close the imageServer to release OMERO ressources
  *  
 */
 
@@ -99,6 +100,7 @@ for (entry in qpproject.getImageList()) {
         }
         
         println "The current image "+server.getId()+" has been processed \n"
+        server.close()
     }
 }
  

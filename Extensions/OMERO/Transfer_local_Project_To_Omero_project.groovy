@@ -14,6 +14,9 @@
  * @author Olivier Burri & Remy Dornier
  * @date 2023-04-05
  * Last tested on QuPath-0.4.3
+ * 
+ * History 
+ *  - 2023.07.05 : close the imageServer to release OMERO ressources
  */
  
  
@@ -84,6 +87,9 @@ getProject().getImageList().each { omeroImage->
     // set metadata on omero image
     def metadata = localEntry.getMetadataMap()
     metadata.each{omeroImage.putMetadataValue(it.getKey(), it.getValue())}
+    
+    // close the hidden imageServer
+    omeroImageData.getServer().close()
     
     print 'Done! for image  '+name
 }
