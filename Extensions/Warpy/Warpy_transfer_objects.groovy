@@ -24,6 +24,20 @@ def sourceEntry = sourceEntries[0]
 // Recover the RealTransform that was put there by WSI Aligner 
 def transform = Warpy.getRealTransform( sourceEntry, targetEntry )
 
+// ####### TMAs ####### 
+// If you have TMAs, you need to do this differently
+def tma = Warpy.getTMAGridFromEntry( sourceEntry )
+def newGrid = Warpy.transferTMAGrid( tma, transform )
+
+// Transfer the grid and all children
+getCurrentHierarchy().setTMAGrid(newGrid)
+
+// Adding intensity measurements to TMA
+Warpy.addIntensityMeasurements(newGrid.getTMACoreList(), 1)
+
+// ####### REGULAR ANNOTATIONS #######
+// If you have annotations without TMAs, you could do it like this
+
 // Recover the objects we wish to transform into the target image
 // This step ensures you can have control over what gets transferred
 def objectsToTransfer = Warpy.getPathObjectsFromEntry( sourceEntry )
