@@ -18,6 +18,15 @@
  * @author Remy Dornier
  * @date 2023-07-10
  * Last tested on QuPath-0.4.3
+ * version v2.0
+ * 
+ * REQUIRED DEPENDENCY : omero-ij.5.8.2-all.jar (previous versions won't work to download vsi files)
+ * 
+ * /// History ////
+ * 2023.07.10 : first version --v1.0
+ * 2023.09.04 : Use embedded download method from OMERO java gateway after bug fix for filset images --v2.0
+ * 2023.09.04 : fix bug on annotation transfer --v2.0
+ * 2023.09.04 : use the up-to-date dependency - omero-ij.5.8.2-all.jar --v2.0
  */
  
  
@@ -99,10 +108,10 @@ filesetOmeroImagesMap.keySet().each{filesetId ->
     
     // download the image from OMERO
     println "Download from OMERO"
-    def files = downloadImage(omeroClient, localDownloadPath, omeroImageId)
-    //def files = omeroClient.getGateway().getFacility(TransferFacility.class).downloadImage(omeroClient.getContext(), localDownloadPath, omeroImageId);
+    //def files = downloadImage(omeroClient, localDownloadPath, omeroImageId)
+    def files = omeroClient.getGateway().getFacility(TransferFacility.class).downloadImage(omeroClient.getContext(), localDownloadPath, omeroImageId);
     
-    // filter to get only the omage file (and not files in sub-folders)
+    // filter to get only the image file (and not files in sub-folders)
     def localImagePath = files.stream().filter(e->e.isFile() && e.getParentFile().getAbsolutePath().equals(localDownloadPath)).collect(Collectors.toList()).get(0).getAbsolutePath()
     println "Local image path : "+localImagePath
     
@@ -144,7 +153,8 @@ filesetLocalImagesMap.keySet().each{filesetId ->
             
             if(!nameToMatch.isEmpty()) {
                 def matchedFiles = qpOmeroImages.collect{e-> if(e.getImageName().toLowerCase().contains(nameToMatch)) return e}
-                println "Matches fils "+matchedFiles
+                matchedFiles = matchedFiles - null
+                println "Matched files "+matchedFiles
                 if(matchedFiles.size() > 0 && matchedFiles.get(0) != null) {
                     println "Found one !" 
                     matchedOmeroEntry = matchedFiles.get(0)
@@ -311,200 +321,18 @@ PathObject transformObject( def pathObject, boolean copyMeasurements ) {
 }
 
 
-
-
-/**
- * ////////////////////////////////////////////////////////
- * WARNING : THIS METHOD HAS BEEN COPYED AND ADAPTED FROM 
- * https://github.com/ome/omero-gateway-java/blob/master/src/main/java/omero/gateway/facility/TransferFacilityHelper.java
- * //////////////////////////////////////////////////////
- * 
- * 
- * Downloads the original file of an image from the server.
- *
- * client : OmeroClient.
- * targetPath : Path to the file.
- * imageId : The identifier of the image.
- * @return the list of all downloaded files (does not take care if they are inside folders or not)
- *
- */
-def downloadImage(omeroClient, targetPath, imageId) {
-    List<File> files = new ArrayList<File>();
-    def gateway = omeroClient.getGateway()
-    def browse = gateway.getFacility(BrowseFacility.class)
-    def context = omeroClient.getContext()
-    
-    ImageData image = browse.findObject(context, ImageData.class, imageId,true);
-
-    String query;
-    List<?> filesets;
-    try {
-        IQueryPrx service = gateway.getQueryService(context);
-        ParametersI param = new ParametersI();
-        long id;
-        if (image.isFSImage()) {
-            id = image.getId();
-            List<RType> l = new ArrayList<RType>();
-            l.add(rlong(id));
-            param.add("imageIds", rlist(l));
-            query = createFileSetQuery();
-        } else {// Prior to FS
-            if (image.isArchived()) {
-                StringBuffer buffer = new StringBuffer();
-                id = image.getDefaultPixels().getId();
-                buffer.append("select ofile from OriginalFile as ofile ");
-                buffer.append("join fetch ofile.hasher ");
-                buffer.append("left join ofile.pixelsFileMaps as pfm ");
-                buffer.append("left join pfm.child as child ");
-                buffer.append("where child.id = :id");
-                param.map.put("id", rlong(id));
-                query = buffer.toString();
-            } else
-                return null;
-        }
-        filesets = service.findAllByQuery(query, param);
-    } catch (Exception e) {
-        throw new DSAccessException("Cannot retrieve original file", e);
-    }
-
-    Map<Boolean, Object> result = new HashMap<Boolean, Object>();
-    if (CollectionUtils.isEmpty(filesets))
-        return files;
-    List<File> downloaded = new ArrayList<File>();
-    List<String> notDownloaded = new ArrayList<String>();
-    result.put(Boolean.valueOf(true), downloaded);
-    result.put(Boolean.valueOf(false), notDownloaded);
-
-    if (image.isFSImage()) {
-        for (Object tmp : filesets) {
-            Fileset fs = (Fileset) tmp;
-
-            String repoPath = fs.getTemplatePrefix().getValue();
-            for (FilesetEntry fse: fs.copyUsedFiles()) {
-                OriginalFile of = fse.getOriginalFile();
-                String ofDir = of.getPath().getValue().replace(repoPath, "");
-                File outDir = new File(targetPath+File.separator+ofDir);
-                outDir.mkdirs();
-                File saved = saveOriginalFile(gateway, context, of, outDir);
-                if (saved != null)
-                    downloaded.add(saved);
-                else
-                    notDownloaded.add(of.getName().getValue());
-            }
-        }
-    }
-    else { //Prior to FS
-        for (Object tmp : filesets) {
-            OriginalFile of = (OriginalFile) tmp;
-            File outDir = new File(targetPath);
-            File saved = saveOriginalFile(gateway, context, of, outDir);
-            if (saved != null)
-                downloaded.add(saved);
-            else
-                notDownloaded.add(of.getName().getValue());
-        }
-    }
-
-    return downloaded;
-}
-
-
-/**
- * ////////////////////////////////////////////////////////
- * WARNING : THIS METHOD HAS BEEN COPYED AND ADAPTED FROM 
- * https://github.com/ome/omero-gateway-java/blob/master/src/main/java/omero/gateway/facility/TransferFacilityHelper.java
- * //////////////////////////////////////////////////////
- * 
- * 
- * Save an OriginalFile of into directory dir
- * @param gateway The OMERO gateway
- * @param ctx The SecurityContext
- * @param of The OriginalFile
- * @param dir The output directory
- * @return The File if the operation was successfull, null if it wasn't.
- */
-def saveOriginalFile(gateway, ctx, of, dir) {
-    def INC = 262144
-    File out = new File(dir, of.getName().getValue());
-    if (out.exists()) {
-        return null;
-    }
-
-    try {
-        RawFileStorePrx store = gateway.getRawFileService(ctx);
-        store.setFileId(of.getId().getValue());
-
-        long size = of.getSize().getValue();
-        long offset = 0;
-        try (FileOutputStream stream = new FileOutputStream(out))
-        {
-            for (offset = 0; (offset+INC) < size;) {
-                stream.write(store.read(offset, INC));
-                offset += INC;
-            }
-            stream.write(store.read(offset, (int) (size-offset)));
-        }
-    } catch (Exception e) {
-
-        return null;
-    }
-    return out;
-}
-
-
-
-/**
- * ////////////////////////////////////////////////////////
- * WARNING : THIS METHOD HAS BEEN COPYED FROM 
- * https://github.com/ome/omero-gateway-java/blob/master/src/main/java/omero/gateway/facility/TransferFacilityHelper.java
- * //////////////////////////////////////////////////////
- * 
- * 
- * Creates the query to load the file set corresponding to a given image.
- *
- * @return the query.
- */
-private String createFileSetQuery() {
-    StringBuffer buffer = new StringBuffer();
-    buffer.append("select fs from Fileset as fs ");
-    buffer.append("join fetch fs.images as image ");
-    buffer.append("left outer join fetch fs.usedFiles as usedFile ");
-    buffer.append("join fetch usedFile.originalFile as f ");
-    buffer.append("join fetch f.hasher ");
-    buffer.append("where image.id in (:imageIds)");
-    return buffer.toString();
-}
-
-
 /**
  * imports
  */
 import omero.gateway.facility.TransferFacility
-import omero.gateway.facility.BrowseFacility
 import qupath.ext.biop.servers.omero.raw.*
 import java.util.stream.Collectors
 import java.io.File;
-import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
 
-import omero.RType;
-import omero.api.IQueryPrx;
-import omero.api.RawFileStorePrx;
-import omero.gateway.Gateway;
-import omero.gateway.SecurityContext;
-import omero.gateway.exception.DSAccessException;
-import omero.gateway.exception.DSOutOfServiceException;
-import omero.gateway.model.ImageData;
-import omero.model.Fileset;
-import omero.model.FilesetEntry;
-import omero.model.OriginalFile;
-import omero.sys.ParametersI;
-
-import org.apache.commons.collections.CollectionUtils;
 import qupath.lib.common.GeneralTools;
 import qupath.lib.gui.QuPathGUI;
 import qupath.lib.gui.dialogs.Dialogs;
@@ -518,6 +346,3 @@ import qupath.lib.projects.Project;
 import qupath.lib.projects.ProjectIO;
 import qupath.lib.projects.ProjectImageEntry;
 import qupath.lib.gui.scripting.QPEx
-
-import static omero.rtypes.rlist
-import static omero.rtypes.rlong
