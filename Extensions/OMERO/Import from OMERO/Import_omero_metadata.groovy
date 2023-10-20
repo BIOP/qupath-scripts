@@ -39,6 +39,7 @@ import qupath.lib.scripting.QP
  * 
  * History
  *  - 2022-11-03 : update documentation
+ *  - 2023.10.20 : add omero tags and refactor output message
  *  
 */
 
@@ -77,19 +78,12 @@ ImageServer<?> server = QP.getCurrentServer()
 
 // check if the current server is an OMERO server. If not, throw an error
 if(!(server instanceof OmeroRawImageServer)){
-	Dialogs.showErrorMessage("Key value pairs importation","Your image is not from OMERO ; please use an image that comes from OMERO to use this script");
-	return
+    println "The image '"+QP.getCurrentImageName()+"' is not coming from OMERO !"
+}else{
+    OmeroRawScripting.addOmeroTags(server)
+    OmeroRawScripting.addOmeroKeyValuesAndUpdateMetadata(server)
+
+    println "Tags and KeyValues imported and metadata updated in QuPath"
 }
-		
-		// OPTION 1 === import metadata from OMERO 
-		Map<String,String> metadata = OmeroRawScripting.importOmeroKeyValues(server)
-		OmeroRawScripting.addAndUpdateMetadata(metadata)
-		
-		// OPTION 2 === import metadata from OMERO 
-		OmeroRawScripting.addOmeroKeyValuesAndUpdateMetadata(server)
-
-// display success
-println "Metadata imported and updated in QuPath \n"
-
 
 
