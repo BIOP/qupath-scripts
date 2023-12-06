@@ -76,6 +76,8 @@ import qupath.lib.gui.measure.ObservableMeasurementTableData;
  * 
  **/
 
+boolean deleteTable = false // if you want to delete ROIs on OMERO
+
 // get the current displayed image on QuPath
 ImageServer<?> server = QP.getCurrentServer()
 
