@@ -38,7 +38,8 @@ import qupath.lib.scripting.QP
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * 
  * History
- *  - 2022-11-03 : update documentation 
+ *  - 2023-11-03 : update documentation 
+ *  - 2023-12-06 . Fix bug 
  * 
 */
 
@@ -72,10 +73,10 @@ if(!(server instanceof OmeroRawImageServer)){
 
 /****  send one tag  ****/
 // initialize tag
-String tag = "myNewTag"
+List tags = ["myNewTag"]
 
 // send tags to OMERO
-boolean wasSent = OmeroRawScripting.sendTagToOmero(tag, server)
+boolean wasSent = OmeroRawScripting.sendTagsToOmero(tags, server)
 
 // display success
 if(wasSent)
@@ -86,7 +87,7 @@ else
 
 /****  send a list of tags  ****/
 // initialize tags
-List tags = ["tag1","tag2"]
+tags = ["tag1","tag2"]
 
 // send tags to OMERO
 wasSent = OmeroRawScripting.sendTagsToOmero(tags, server)
