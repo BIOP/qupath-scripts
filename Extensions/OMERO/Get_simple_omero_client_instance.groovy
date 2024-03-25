@@ -15,7 +15,7 @@ import fr.igred.omero.*
  *  - nothing to do !
  *  
  * = AUTHOR INFORMATION =
- * Code written by Rémy Dornier, EPFL - SV -PTECH - BIOP 
+ * Code written by Rémy Dornier, EPFL - SV - PTECH - BIOP 
  * 14.10.2022
  * 
  * = COPYRIGHT =
@@ -40,6 +40,7 @@ import fr.igred.omero.*
  * 
  * History
  *  - 2022-11-03 : update script to match refactoring + update documentation
+ *  - 2024.03.25 : Update imports and code for qupath-extension-biop-omero-1.0.0
  * 
 */
 
@@ -54,7 +55,7 @@ if(!(server instanceof OmeroRawImageServer)){
 }
 
 // get a simple-omero-client instance already connect to the current session (no credentials needed)
-Client user_client = OmeroRawScripting.getSimpleOmeroClientInstance(server)
+Client user_client = server.getClient().getSimpleClient()
 
 if (user_client.isConnected()){
 	println "Connected to OMERO \n"
@@ -65,9 +66,3 @@ if (user_client.isConnected()){
 	/* 			Client user_client = new Client()
 	   			user_client.connect(host, port, USERNAME, PASSWORD.toCharArray())   
 	*/
-
-// by 
-	/*          Client user_client = OmeroRawScripting.getSimpleOmeroClientInstance()
-	 *                   
-	 */
-	 

@@ -1,4 +1,7 @@
 import qupath.ext.biop.servers.omero.raw.*
+import qupath.ext.biop.servers.omero.raw.client.*
+import qupath.ext.biop.servers.omero.raw.command.*
+import qupath.ext.biop.servers.omero.raw.utils.*
 import qupath.lib.scripting.QP
 
 /*
@@ -17,7 +20,7 @@ import qupath.lib.scripting.QP
  *  - run the script.
  *  
  * = AUTHOR INFORMATION =
- * Code written by Rémy Dornier, EPFL - SV -PTECH - BIOP 
+ * Code written by Rémy Dornier, EPFL - SV - PTECH - BIOP 
  * 03.11.2022
  * 
  * = COPYRIGHT =
@@ -42,6 +45,8 @@ import qupath.lib.scripting.QP
  * 
  * History
  * - 2023-04-19 : update documentation
+ * - 2024.03.25 : Update imports and code for qupath-extension-biop-omero-1.0.0
+ * 
 */
 
 
@@ -62,13 +67,14 @@ if(!(server instanceof OmeroRawImageServer)){
 	return
 }
 
+boolean showNotif = true
 
 // set channels display range
-OmeroRawScripting.setChannelsDisplayRangeFromOmeroChannel(server)
+OmeroRawScripting.copyOmeroChannelsDisplayRangeToQuPath(server, showNotif)
 // set channels color
-OmeroRawScripting.setChannelsColorFromOmeroChannel(server)
+OmeroRawScripting.copyOmeroChannelsColorToQuPath(server, showNotif)
 // set channels names
-OmeroRawScripting.setChannelsNameFromOmeroChannel(server)
+OmeroRawScripting.copyOmeroChannelsNameToQuPath(server, showNotif)
 
 
 // display success

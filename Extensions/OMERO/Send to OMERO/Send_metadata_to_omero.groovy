@@ -1,4 +1,7 @@
 import qupath.ext.biop.servers.omero.raw.*
+import qupath.ext.biop.servers.omero.raw.client.*
+import qupath.ext.biop.servers.omero.raw.command.*
+import qupath.ext.biop.servers.omero.raw.utils.*
 import qupath.lib.scripting.QP
 
 /*
@@ -18,7 +21,7 @@ import qupath.lib.scripting.QP
  *  - Run the script. 
  *  
  * = AUTHOR INFORMATION =
- * Code written by Rémy Dornier, EPFL - SV -PTECH - BIOP 
+ * Code written by Rémy Dornier, EPFL - SV - PTECH - BIOP 
  * 14.10.2022
  * 
  * = COPYRIGHT =
@@ -43,20 +46,15 @@ import qupath.lib.scripting.QP
  * 
  * History
  *  - 2022-11-03 : update documentation 
+ *  - 2024.03.25 : Update imports and code for qupath-extension-biop-omero-1.0.0 
 */
 
-
 /**
- * There is three implementations of the method 
- * 
- *  	1. sendMetadataOnOmero(metadata, server) ===> Add new key value pairs on OMERO
- * 
- * 		2. sendMetadataOnOmeroAndUpdateKeyValues(metadata, server) ===> Update current key value pairs on OMERO
- * 		and add new ones
- * 		
- * 		3. sendMetadataOnOmeroAndDeleteKeyValues(metadata, server) ===> Delete current key value pairs on OMERO
- * 		and add new ones
- * 
+ * You have 4 choices for the Utils.UpdatePolicy
+ *     1. Utils.UpdatePolicy.KEEP_KEYS
+ *     2. Utils.UpdatePolicy.UPDATE_KEYS
+ *     3. Utils.UpdatePolicy.DELETE_KEYS
+ *     4. Utils.UpdatePolicy.NO_UPDATE 
  */
 
 
@@ -72,15 +70,18 @@ ImageServer<?> server = QP.getCurrentServer()
 
 // check if the current server is an OMERO server. If not, throw an error
 if(!(server instanceof OmeroRawImageServer)){
-	Dialogs.showErrorMessage("Sending metadata","Your image is not from OMERO ; please use an image that comes from OMERO to use this script");
-	return
+    Dialogs.showErrorMessage("Sending metadata","Your image is not from OMERO ; please use an image that comes from OMERO to use this script");
+    return
 }
 
 // get metadata
-Map<String,String> qpMetadata = QP.getProjectEntry().getMetadataMap()
+def qpMetadata = QP.getProjectEntry().getMetadataMap()
 
 // send metadata to OMERO
-boolean wasSent = OmeroRawScripting.sendMetadataOnOmero(qpMetadata, server)
+boolean showNotif = true
+def tagPolicy = Utils.UpdatePolicy.UPDATE_KEYS
+def kvpPolicy = Utils.UpdatePolicy.UPDATE_KEYS
+boolean wasSent = OmeroRawScripting.sendQPMetadataToOmero(qpMetadata, server, kvpPolicy, tagPolicy, showNotif)
 
 // display success
 if(wasSent)

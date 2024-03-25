@@ -1,4 +1,7 @@
 import qupath.ext.biop.servers.omero.raw.*
+import qupath.ext.biop.servers.omero.raw.client.*
+import qupath.ext.biop.servers.omero.raw.command.*
+import qupath.ext.biop.servers.omero.raw.utils.*
 import qupath.lib.scripting.QP
 import qupath.lib.gui.measure.ObservableMeasurementTableData;
 
@@ -19,7 +22,7 @@ import qupath.lib.gui.measure.ObservableMeasurementTableData;
  *  - Run the script. 
  *  
  * = AUTHOR INFORMATION =
- * Code written by Rémy Dornier, EPFL - SV -PTECH - BIOP 
+ * Code written by Rémy Dornier, EPFL - SV - PTECH - BIOP 
  * 20.10.2022
  * 
  * = COPYRIGHT =
@@ -45,29 +48,8 @@ import qupath.lib.gui.measure.ObservableMeasurementTableData;
  * History
  *  - 2022-11-03 : update documentation 
  *  - 2023-04-19 : add file deletion and update documentation
- * 
+ *  - 2024.03.25 : Update imports and code for qupath-extension-biop-omero-1.0.0 
 */
-
-
-/**
- * There is many implementations to send pathObjects to OMERO : 
- * 
- * /// sending an OMERO.table 
- * 		1. sendDetectionMeasurementTable(pathObjects, server, image_data) ==> send measurement table with only the specified pathObjects 
- * 		2. sendDetectionMeasurementTable(server, image_data) ==> send measurement table with all detections
- * 		
- * /// sending a csv file
- * 		1. sendDetectionMeasurementTableAsCSV(pathObjects, server, image_data) ==> send measurement table with only the specified pathObjects 
- * 		2. sendDetectionMeasurementTableAsCSV(server, image_data) ==> send measurement table with all detections
- * 
- * /// delete files
- *              1. deleteDetectionFiles(server)
- *              2. deleteDetectionFiles(server, fileAnnotationData)
- * 
- * /// readOmeroFile
- *              1. readFilesAttachedToCurrentImageOnOmero(server)
- * 
- */
  
 
 /**
@@ -91,51 +73,21 @@ Collection<PathObject> pathObjects = QP.getDetectionObjects()
 // get image data
 def imageData = QP.getCurrentImageData()
 
+// send the table to OMERO as OMERO.table
+boolean deleteTable = false
+String owner = "" // to get rois from all owners, you can set the owner to empty string, or use Utils.ALL_USERS
+boolean showNotif = true
+boolean tableWasSent = OmeroRawScripting.sendDetectionMeasurementsToOmero(server, pathObjects, imageData, deleteTable, owner, showNotif);
+boolean csvWasSent = OmeroRawScripting.sendDetectionMeasurementsAsCSVToOmero(server, pathObjects, imageData, deleteTable, owner, showNotif);
 
-/** 
- *                 Option 1
- * 1. first, read the files on the current image.
- * 2. send detection tables
- * 3. Delete previous file versions
- **/
-    def files
-    if(deleteTable) {
-        files = OmeroRawScripting.readFilesAttachedToCurrentImageOnOmero(server)
-    }
-    
-    // send the table to OMERO as OMERO.table
-    boolean tableWasSent = OmeroRawScripting.sendDetectionMeasurementTable(pathObjects, server, imageData);
-    boolean csvWasSent = OmeroRawScripting.sendDetectionMeasurementTableAsCSV(pathObjects, server, imageData);
-    
-    if(deleteTable) {
-        OmeroRawScripting.deleteDetectionFiles(server, files)
-    }
-    
-    if(tableWasSent && csvWasSent)
-    	println "Detection table sent to OMERO as OMERO.table"
-    else
-    	println "An issue occurs when trying to send table to OMERO"
+if(deleteTable) {
+    OmeroRawScripting.deleteDetectionFiles(server, files)
+}
 
-
-
-/** 
- *                 Option 2
- * 1. first, delete all annotation and detection files related to the current QuPath project
- * 2. send annotations and detection tables
- **/
-    /*if(deleteTable) {
-        OmeroRawScripting.deleteDetectionFiles(server)
-    }
-    
-    // send the table to OMERO as OMERO.table
-    boolean tableWasSent = OmeroRawScripting.sendDetectionMeasurementTable(pathObjects, server, imageData);
-    boolean csvWasSent = OmeroRawScripting.sendDetectionMeasurementTableAsCSV(pathObjects, server, imageData);
-    
-    
-    if(tableWasSent && csvWasSent)
-    	println "Detection table sent to OMERO as OMERO.table"
-    else
-    	println "An issue occurs when trying to send table to OMERO"*/
+if(tableWasSent && csvWasSent)
+    println "Detection table sent to OMERO as OMERO.table and CSV file"
+else
+    println "An issue occurs when trying to send table to OMERO"
 
 
 

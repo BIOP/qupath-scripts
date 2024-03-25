@@ -1,4 +1,7 @@
 import qupath.ext.biop.servers.omero.raw.*
+import qupath.ext.biop.servers.omero.raw.client.*
+import qupath.ext.biop.servers.omero.raw.command.*
+import qupath.ext.biop.servers.omero.raw.utils.*
 import qupath.lib.scripting.QP
 
 /*
@@ -15,7 +18,7 @@ import qupath.lib.scripting.QP
  *  - Run the script.
  *  
  * = AUTHOR INFORMATION =
- * Code written by Rémy Dornier, EPFL - SV -PTECH - BIOP 
+ * Code written by Rémy Dornier, EPFL - SV - PTECH - BIOP 
  * 14.10.2022
  * 
  * = COPYRIGHT =
@@ -40,29 +43,9 @@ import qupath.lib.scripting.QP
  * 
  * History
  *  - 2022-11-03 : update documentation 
- * 
+ *  - 2024.03.25 : Update imports and code for qupath-extension-biop-omero-1.0.0 
 */
 
-
-/**
- * There is many implementations to send pathObjects to OMERO : 
- * 
- * /// for the three following methods, exitsing ROIs on OMERO are NOT deleted
- * 		1. sendPathObjectsToOmero(server) ==> send all annotations AND all detections 
- * 		2. sendAnnotationsToOmero(server) ==> send all annotations
- * 		3. sendDetectionsToOmero(server) ==> send all detections
- * 		
- * 	/// for the three following methods, the user can choose to delete or not existing ROIs
- * 		4. sendPathObjectsToOmero(server, deleteROI) ==> send all annotations AND all detections 
- * 		5. sendAnnotationsToOmero(server, deleteROI) ==> send all annotations
- * 		6. sendDetectionsToOmero(server, deleteROI) ==> send all detections
- * 		
- * 		7. sendPathObjectsToOmero(server, pathObjects) ==> send the given pathObjects to OMERO WITHOUT deleting existing ROIs
- * 		8. sendPathObjectsToOmero(server, pathObjects, deleteROI) ==> send the given pathObjects to OMERO and 
- * 		let the user choose to delete or not existing ROIs
- * 
- */
- 
 
 // set variables
 boolean deleteROI = false // if you want to delete ROIs on OMERO
@@ -83,11 +66,16 @@ if(!(server instanceof OmeroRawImageServer)){
 	return
 }
 
-// get all annotation objects
-Collection<PathObject> pathObjects = QP.getAnnotationObjects()
+def roisOwner = "" // to get rois from all owners, you can set the owner to empty string, or use Utils.ALL_USERS
+boolean showNotif = true
 
-// send annotations to OMERO
-boolean wasSent = OmeroRawScripting.sendPathObjectsToOmero(server, pathObjects, deleteROI)
+/**OPTION 1 : get annotations and send pathobjects **/
+Collection<PathObject> pathObjects = QP.getAnnotationObjects()
+boolean wasSent = OmeroRawScripting.sendPathObjectsToOmero(server, pathObjects, deleteROI, roisOwner, showNotif)
+
+/**OPTION 2 : directly send annotations **/
+//boolean wasSent = OmeroRawScripting.sendAnnotationsToOmero(server, deleteROI, roisOwner, showNotif)
+
 
 // display success
 if(wasSent)

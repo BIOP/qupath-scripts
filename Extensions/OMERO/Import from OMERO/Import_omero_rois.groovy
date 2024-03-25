@@ -1,4 +1,7 @@
 import qupath.ext.biop.servers.omero.raw.*
+import qupath.ext.biop.servers.omero.raw.client.*
+import qupath.ext.biop.servers.omero.raw.command.*
+import qupath.ext.biop.servers.omero.raw.utils.*
 import qupath.lib.scripting.QP
 
 /*
@@ -14,7 +17,7 @@ import qupath.lib.scripting.QP
  *  - If no ROIs are attached to your image on OMERO, you can create a ROI on OMERO and then run the script.
  *  
  * = AUTHOR INFORMATION =
- * Code written by Rémy Dornier, EPFL - SV -PTECH - BIOP 
+ * Code written by Rémy Dornier, EPFL - SV - PTECH - BIOP 
  * 14.10.2022
  * 
  * = COPYRIGHT =
@@ -39,24 +42,14 @@ import qupath.lib.scripting.QP
  * 
  * History
  *  - 2022-11-03 : update documentation
- *  
+ *  - 2024.03.25 : Update imports and code for qupath-extension-biop-omero-1.0.0
  * 
 */
 
-/**
- * There is two implementations of the method : importOmeroROIsToQuPath
- * 
- * 		1. importOmeroROIsToQuPath(server) ===> do not let the user choose 
- * 		to remove or not existing annotations ; by default, it removes them.
- * 		
- * 		2. importOmeroROIsToQuPath(server, removeAnnotations) ===> let the user choose 
- * 		to remove or not existing annotations
- * 
- */
 
 // set variables
 boolean removeAnnotations = true // remove current qupath annotations, with child objects (i.e. also delete detections)
-
+boolean showNotif = true
 
 /**
  * Import all ROIs attatch to the image on OMERO to QuPath.
@@ -75,7 +68,8 @@ if(!(server instanceof OmeroRawImageServer)){
 }
 
 // get all rois from OMERO
-Collection<PathObject> roiFromOmero = OmeroRawScripting.importOmeroROIsToQuPath(server, removeAnnotations)
+def roisOwner = "" // to get rois from all owners, you can set the owner to empty string, or use Utils.ALL_USERS
+Collection<PathObject> roiFromOmero = OmeroRawScripting.addROIsToQuPath(server, removeAnnotations, roisOwner, showNotif)
 
 // display the success
 println "ROIs successfully imported"

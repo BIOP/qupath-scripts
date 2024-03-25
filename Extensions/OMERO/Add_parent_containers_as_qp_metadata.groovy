@@ -1,6 +1,9 @@
 import qupath.ext.biop.servers.omero.raw.*
+import qupath.ext.biop.servers.omero.raw.client.*
+import qupath.ext.biop.servers.omero.raw.command.*
+import qupath.ext.biop.servers.omero.raw.utils.*
 import qupath.lib.scripting.QP
-import omero.gateway.model.DatasetData;
+import fr.igred.omero.repository.DatasetWrapper;
 
 /*
  * = DEPENDENCIES =
@@ -15,7 +18,7 @@ import omero.gateway.model.DatasetData;
  *  - Should run like this :)
  *  
  * = AUTHOR INFORMATION =
- * Code written by Rémy Dornier, EPFL - SV -PTECH - BIOP 
+ * Code written by Rémy Dornier, EPFL - SV - PTECH - BIOP 
  * 11.03.2023
  * 
  * = COPYRIGHT =
@@ -41,6 +44,7 @@ import omero.gateway.model.DatasetData;
  * History
  *  - 2023-04-19 : update for HCS data
  *  - 2023.07.05 : close the imageServer to release OMERO ressources
+ *  - 2024.03.25 : Update imports and code for qupath-extension-biop-omero-1.0.0
  *  
 */
 
@@ -61,16 +65,16 @@ for (entry in qpproject.getImageList()) {
     if((server instanceof OmeroRawImageServer)){
         
         // get the parent container
-        def parentList = OmeroRawTools.getParent(server.getClient(), "Image", server.getId())
+        def parentList = OmeroRawTools.getParentContainer(server.getClient(), server.getImageWrapper(), true)
         if(parentList.size() > 0){
             def parent = parentList.get(0)
             
             // if parent is a dataset
-            if(parent instanceof DatasetData) {
+            if(parent instanceof DatasetWrapper) {
                 entry.putMetadataValue("Dataset", parent.getName());
             
                 // get parent project
-                def projectList = OmeroRawTools.getParent(server.getClient(), "Dataset", parent.getId())
+                def projectList = OmeroRawTools.getParentContainer(server.getClient(), parent, true)
                 if(projectList.size() > 0){
                     def project = projectList.get(0)
                     entry.putMetadataValue("Project", project.getName());
@@ -82,14 +86,14 @@ for (entry in qpproject.getImageList()) {
                 entry.putMetadataValue("Well", wellName);
                 
                 // get the parent plate
-                def plateList = OmeroRawTools.getParent(server.getClient(), "Well", parent.getId())
+                def plateList = OmeroRawTools.getParentContainer(server.getClient(), parent, true)
                 if(plateList.size() > 0){
                     def plate = plateList.get(0)
 
                     entry.putMetadataValue("Plate", plate.getName());
                     
                     // get the parent screen
-                    def screenList = OmeroRawTools.getParent(server.getClient(), "Plate", plate.getId())
+                    def screenList = OmeroRawTools.getParentContainer(server.getClient(), plate, true)
                     
                     if(screenList.size() > 0){
                         def screen = screenList.get(0)

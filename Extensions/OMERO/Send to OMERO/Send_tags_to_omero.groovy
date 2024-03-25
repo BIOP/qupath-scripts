@@ -1,4 +1,7 @@
 import qupath.ext.biop.servers.omero.raw.*
+import qupath.ext.biop.servers.omero.raw.client.*
+import qupath.ext.biop.servers.omero.raw.command.*
+import qupath.ext.biop.servers.omero.raw.utils.*
 import qupath.lib.scripting.QP
 
 /*
@@ -14,7 +17,7 @@ import qupath.lib.scripting.QP
  *  - nothing to do !
  *  
  * = AUTHOR INFORMATION =
- * Code written by Rémy Dornier, EPFL - SV -PTECH - BIOP 
+ * Code written by Rémy Dornier, EPFL - SV - PTECH - BIOP 
  * 20.10.2022
  * 
  * = COPYRIGHT =
@@ -39,20 +42,16 @@ import qupath.lib.scripting.QP
  * 
  * History
  *  - 2022-11-03 : update documentation 
- * 
+ *  - 2024.03.25 : Update imports and code for qupath-extension-biop-omero-1.0.0 
 */
 
-
 /**
- * There is two implementations of the method 
- * 
- *  	1. sendTagToOmero(tag, server) ===> send one tag to OMERO
- * 
- * 		2. sendTagsToOmero(List_of_tags, server) ===> send a list of tags on OMERO	
- * 
+ * You have 4 choices for the Utils.UpdatePolicy
+ *     1. Utils.UpdatePolicy.KEEP_KEYS
+ *     2. Utils.UpdatePolicy.UPDATE_KEYS
+ *     3. Utils.UpdatePolicy.DELETE_KEYS
+ *     4. Utils.UpdatePolicy.NO_UPDATE 
  */
-
-
 
 /**
  * Send tags to OMERO, 
@@ -72,31 +71,16 @@ if(!(server instanceof OmeroRawImageServer)){
 
 /****  send one tag  ****/
 // initialize tag
-String tag = "myNewTag"
+List<String> tags = ["myNewTag"]
 
 // send tags to OMERO
-boolean wasSent = OmeroRawScripting.sendTagToOmero(tag, server)
+boolean showNotif = true
+boolean wasSent = OmeroRawScripting.sendTagsToOmero(tags, server, Utils.UpdatePolicy.UPDATE_KEYS, showNotif)
 
 // display success
 if(wasSent)
-	println "Tag sent to OMERO"
+	println "Tags sent to OMERO"
 else
-	println "An issue occurs when trying to send tag to OMERO"
-
-
-/****  send a list of tags  ****/
-// initialize tags
-List tags = ["tag1","tag2"]
-
-// send tags to OMERO
-wasSent = OmeroRawScripting.sendTagsToOmero(tags, server)
-
-// display success
-if(wasSent)
-	println "List of tags sent to OMERO"
-else
-	println "An issue occurs when trying to send a list of tags to OMERO"
-
-
+	println "An issue occurs when trying to send tags to OMERO"
 
 

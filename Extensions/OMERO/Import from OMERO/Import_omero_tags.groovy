@@ -1,4 +1,7 @@
 import qupath.ext.biop.servers.omero.raw.*
+import qupath.ext.biop.servers.omero.raw.client.*
+import qupath.ext.biop.servers.omero.raw.command.*
+import qupath.ext.biop.servers.omero.raw.utils.*
 import qupath.lib.scripting.QP
 
 /*
@@ -14,7 +17,7 @@ import qupath.lib.scripting.QP
  *  - If no tags are attached to your image on OMERO, you can create a new tag and then run the script.  
  *  
  * = AUTHOR INFORMATION =
- * Code written by Rémy Dornier, EPFL - SV -PTECH - BIOP 
+ * Code written by Rémy Dornier, EPFL - SV - PTECH - BIOP 
  * 20.10.2022
  * 
  * = COPYRIGHT =
@@ -39,10 +42,16 @@ import qupath.lib.scripting.QP
  * 
  * History
  *  - 2022-11-03 : update documentation 
- * 
+ *  - 2024.03.25 : Update imports and code for qupath-extension-biop-omero-1.0.0 
 */
 
-
+/**
+ * You have 4 choices for the Utils.UpdatePolicy
+ *     1. Utils.UpdatePolicy.KEEP_KEYS
+ *     2. Utils.UpdatePolicy.UPDATE_KEYS
+ *     3. Utils.UpdatePolicy.DELETE_KEYS
+ *     4. Utils.UpdatePolicy.NO_UPDATE 
+ */
 
 /**
  * Import tags attached to the current opened image from OMERO, 
@@ -59,7 +68,8 @@ if(!(server instanceof OmeroRawImageServer)){
 }
 
 // import tags from OMERO
-List<String> tags = OmeroRawScripting.importOmeroTags(server)
+boolean showNotif = true
+List<String> tags = OmeroRawScripting.addTagsToQuPath(server, Utils.UpdatePolicy.UPDATE_KEYS, showNotif)
 tags.each{println it}
 
 // display success

@@ -1,4 +1,7 @@
 import qupath.ext.biop.servers.omero.raw.*
+import qupath.ext.biop.servers.omero.raw.client.*
+import qupath.ext.biop.servers.omero.raw.command.*
+import qupath.ext.biop.servers.omero.raw.utils.*
 import qupath.lib.scripting.QP
 
 /*
@@ -15,7 +18,7 @@ import qupath.lib.scripting.QP
  *    (channel color, name or range) and having renamed your image (i.e different name from OMERO one).
  *  
  * = AUTHOR INFORMATION =
- * Code written by Rémy Dornier, EPFL - SV -PTECH - BIOP 
+ * Code written by Rémy Dornier, EPFL - SV - PTECH - BIOP 
  * 03.11.2022
  * 
  * = COPYRIGHT =
@@ -40,6 +43,7 @@ import qupath.lib.scripting.QP
  * 
  * History
  * - 2023-04-19 : send image name to OMERO & update documentation
+ * - 2024.03.25 : Update imports and code for qupath-extension-biop-omero-1.0.0  
 */
 
 
@@ -55,22 +59,23 @@ ImageServer<?> server = QP.getCurrentServer()
 
 // check if the current server is an OMERO server. If not, throw an error
 if(!(server instanceof OmeroRawImageServer)){
-	Dialogs.showErrorMessage("Image & channel settings","Your image is not from OMERO ; please use an image that comes from OMERO to use this script");
-	return
+    Dialogs.showErrorMessage("Image & channel settings","Your image is not from OMERO ; please use an image that comes from OMERO to use this script");
+    return
 }
 
+boolean showNotif = true
 
 // set channels display range
-boolean rangesWereSent = OmeroRawScripting.sendChannelsDisplayRangeToOmero(server)
+boolean rangesWereSent = OmeroRawScripting.sendQuPathChannelsDisplayRangeToOmero(server, showNotif)
 
 // set channels color
-boolean colorsWereSent = OmeroRawScripting.sendChannelsColorToOmero(server)
+boolean colorsWereSent = OmeroRawScripting.sendQuPathChannelsColorToOmero(server, showNotif)
 
 // set channels name
-boolean namesWereSent = OmeroRawScripting.sendChannelsNameToOmero(server)
+boolean namesWereSent = OmeroRawScripting.sendQuPathChannelsNameToOmero(server, showNotif)
 
 // set image name
-boolean imageNameWereSent = OmeroRawScripting.sendImageNameToOmero(server)
+boolean imageNameWereSent = OmeroRawScripting.sendQuPathImageNameToOmero(server, showNotif)
 
 
 // display success
