@@ -42,6 +42,7 @@ import qupath.lib.scripting.QP
  * 
  * History
  * - 2022-11-03 : update documentation
+ * - 2023.10.20 : add omero tags and refactor output message
  * - 2024.03.25 : Update imports and code for qupath-extension-biop-omero-1.0.0
  * 
 */
@@ -68,8 +69,8 @@ ImageServer<?> server = QP.getCurrentServer()
 
 // check if the current server is an OMERO server. If not, throw an error
 if(!(server instanceof OmeroRawImageServer)){
-	Dialogs.showErrorMessage("Key value pairs importation","Your image is not from OMERO ; please use an image that comes from OMERO to use this script");
-	return
+    Dialogs.showErrorMessage("Tag importation","Your image is not from OMERO ; please use an image that comes from OMERO to use this script");
+    return
 }
 // add the key-values
 boolean showNotif = true

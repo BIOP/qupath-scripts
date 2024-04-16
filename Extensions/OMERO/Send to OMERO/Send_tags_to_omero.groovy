@@ -42,6 +42,7 @@ import qupath.lib.scripting.QP
  * 
  * History
  *  - 2022-11-03 : update documentation 
+ *  - 2023-12-06 . Fix bug 
  *  - 2024.03.25 : Update imports and code for qupath-extension-biop-omero-1.0.0 
 */
 
@@ -64,8 +65,8 @@ ImageServer<?> server = QP.getCurrentServer()
 
 // check if the current server is an OMERO server. If not, throw an error
 if(!(server instanceof OmeroRawImageServer)){
-	Dialogs.showErrorMessage("Sending tags","Your image is not from OMERO ; please use an image that comes from OMERO to use this script");
-	return
+    Dialogs.showErrorMessage("Sending tags","Your image is not from OMERO ; please use an image that comes from OMERO to use this script");
+    return
 }
 
 
@@ -77,10 +78,13 @@ List<String> tags = ["myNewTag"]
 boolean showNotif = true
 boolean wasSent = OmeroRawScripting.sendTagsToOmero(tags, server, Utils.UpdatePolicy.UPDATE_KEYS, showNotif)
 
+
 // display success
 if(wasSent)
-	println "Tags sent to OMERO"
+    println "Tags sent to OMERO"
 else
-	println "An issue occurs when trying to send tags to OMERO"
+
+    println "An issue occurs when trying to send tags to OMERO"
+
 
 
