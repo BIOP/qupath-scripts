@@ -28,13 +28,13 @@ respectively. The naming convention was chosen to match the one used for the Sta
 
 Authors: Olivier Burri, Romain Guiet BioImaging and Optics Platform (EPFL BIOP)
 
-Tested on QuPath 0.3.2, 2022.04.13
+Tested on QuPath 0.4.0, 2022.12.08 (RG)
 
 Due to the simple nature of this code, no copyright is applicable
 */
 
 // USER SETTINGS
-def channel_of_interest = 2 // null to export all the channels 
+def channel_of_interest = 1 // null to export all the channels 
 def downsample = 1
 
  
