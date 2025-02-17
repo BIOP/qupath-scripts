@@ -17,16 +17,18 @@
  *
  * @author Remy Dornier
  * @date 2023-07-10
- * Last tested on QuPath-0.4.3
- * version v2.0
+ * Last tested on QuPath-0.5.1
+ * version v3.0
  * 
- * REQUIRED DEPENDENCY : omero-ij.5.8.2-all.jar (previous versions won't work to download vsi files)
+ * REQUIRED DEPENDENCY : omero-ij.5.8.6-all.jar (previous versions won't work to download vsi files)
  * 
  * /// History ////
  * 2023.07.10 : first version --v1.0
  * 2023.09.04 : Use embedded download method from OMERO java gateway after bug fix for filset images --v2.0
  * 2023.09.04 : fix bug on annotation transfer --v2.0
  * 2023.09.04 : use the up-to-date dependency - omero-ij.5.8.2-all.jar --v2.0
+ * 2025.02.17 : Copy the rest of the omero project in the local project
+ * 2025.02.17 : update dependencies to omero-ij.5.8.6-all.jar --v3.0
  */
  
  
@@ -38,10 +40,9 @@
 
 
 // The omero project path that has the annotations. 
-def omeroProjectPath = "D:\\Remy\\QuPath\\Migration Local-OMERO\\omeroProject\\project.qpproj"
-
+def omeroProjectPath = "D:\\Remy\\QuPath-OMERO\\Migration Local-OMERO\\omeroProject\\project.qpproj"
 // Path of the folder where to download the images
-def localDownloadPath = "D:\\Remy\\QuPath\\Migration Local-OMERO\\LocalProject\\images"
+def localDownloadPath = "D:\\Remy\\QuPath-OMERO\\Migration Local-OMERO\\newLocalProj\\images"
 
 
 /*************************************************************
@@ -110,9 +111,12 @@ filesetOmeroImagesMap.keySet().each{filesetId ->
     println "Download from OMERO"
     //def files = downloadImage(omeroClient, localDownloadPath, omeroImageId)
     def files = omeroClient.getGateway().getFacility(TransferFacility.class).downloadImage(omeroClient.getContext(), localDownloadPath, omeroImageId);
-    
+    println files
+    println files.size()
+    println files.get(0).getParentFile().getParentFile().getAbsolutePath()
+    println localDownloadPath
     // filter to get only the image file (and not files in sub-folders)
-    def localImagePath = files.stream().filter(e->e.isFile() && e.getParentFile().getAbsolutePath().equals(localDownloadPath)).collect(Collectors.toList()).get(0).getAbsolutePath()
+    def localImagePath = files.stream().filter(e->e.isFile() && e.getParentFile().getParentFile().getAbsolutePath().equals(localDownloadPath)).collect(Collectors.toList()).get(0).getAbsolutePath()
     println "Local image path : "+localImagePath
     
     // add image to the QuPath project and to the map of local imageEntries.
@@ -207,6 +211,52 @@ filesetLocalImagesMap.keySet().each{filesetId ->
         }
     }
 }
+
+
+println "Copying all files from qp local project to qp omero project..."
+def localProjDir = Projects.getBaseDirectory(getProject())
+def omeroProjDir = Projects.getBaseDirectory(omeroProject)
+
+copyFiles(omeroProjDir, omeroProjDir.getAbsolutePath(), localProjDir.getAbsolutePath())
+println "Finished !"
+return
+
+
+/**
+ * Copying all files and folders from a source to destination
+ * EXECPT "project.qpproj" and "project.qpproj.backup" files and "data" folder, which are very important 
+ * to not modify.
+ * 
+ */
+def copyFiles(srcDir, srcPath, destPath){
+    def srcChildFiles = srcDir.listFiles()
+    srcChildFiles.each{src ->
+        if(src.isFile()) {
+            def fname = src.getName() 
+            if(!fname.equalsIgnoreCase("project.qpproj") && !fname.equalsIgnoreCase("project.qpproj.backup")){
+                def absSrcPath = src.getAbsolutePath()
+                def absDestPath = absSrcPath.replace(srcPath, destPath)
+                File absDestFile = new File(absDestPath)
+        
+                if(absDestFile.getParentFile().exists()){
+                    println "File '"+absSrcPath+"' is copied in the existing destination"
+                    Files.copy(src.toPath(), absDestFile.toPath(), StandardCopyOption.REPLACE_EXISTING)
+                }else{
+                    println "File '"+absSrcPath+"' is copied in the newly created destination"
+                    Path path = Paths.get(absDestFile.getParent());
+                    Files.createDirectories(path);
+                    Files.copy(src.toPath(), absDestFile.toPath())
+                }
+            }
+        }else{
+            if(src.isDirectory() && !src.getName().equals("data")){
+                def nFilesSrc = src.list().length
+                copyFiles(src, srcPath, destPath)
+            }
+        }
+    }    
+}
+
 
 /**
  * ////////////////////////////////////////////////////////
@@ -326,12 +376,20 @@ PathObject transformObject( def pathObject, boolean copyMeasurements ) {
  */
 import omero.gateway.facility.TransferFacility
 import qupath.ext.biop.servers.omero.raw.*
+import qupath.ext.biop.servers.omero.raw.client.*
+import qupath.ext.biop.servers.omero.raw.command.*
+import qupath.ext.biop.servers.omero.raw.utils.*
 import java.util.stream.Collectors
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption
 
 import qupath.lib.common.GeneralTools;
 import qupath.lib.gui.QuPathGUI;

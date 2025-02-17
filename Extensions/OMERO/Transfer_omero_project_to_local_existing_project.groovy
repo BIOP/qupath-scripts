@@ -23,7 +23,12 @@
  *
  * @author Remy Dornier
  * @date 2023-07-11
- * Last tested on QuPath-0.4.3
+ * Last tested on QuPath-0.5.1
+ * 
+ * History 
+ *  - 2025.02.17 : Copy the rest of the local project in the OMERO project
+ *  - 2025.02.17 : Dissociate metadata and object deletion
+ * 
  */
  
  
@@ -34,7 +39,8 @@
  * **********************************************************/
  
 // Remove objects from the active OMERO ImageEntry or keep it as is, and just add?
-def deleteExisting = true
+def deleteExistingObjects = true
+def deleteExistingMetadata = false
 
 // The local project path that has the annotations. 
 // Image name in the omero project must match the ones in the local project
@@ -91,11 +97,15 @@ imagesMap.keySet().each{localImageName ->
     def localImageData = localImageEntry.readImageData()
     def localHierarchy = localImageData.getHierarchy()
     
-    // delete local image hierarchy & metadata
-    if (deleteExisting) {
+    // delete lcoal image hierarchy & metadata
+    if (deleteExistingObjects) {
         println 'Delete previous hierarchy '
-        localHierarchy.clearAll();
-        localImageEntry.clearMetadata();
+        omeroHierarchy.clearAll();
+    }
+        // delete omero image hierarchy & metadata
+    if (deleteExistingMetadata) {
+        println 'Delete previous metadata '
+        omeroImage.clearMetadata();
     }
     
     print "Transfer annotations from omero project to current project"
@@ -119,6 +129,51 @@ imagesMap.keySet().each{localImageName ->
     localImageData.getServer().close()
     
     println 'Done! for image  '+name
+}
+
+println "Copying all files from qp local project to qp omero project..."
+def localProjDir = Projects.getBaseDirectory(getProject())
+def omeroProjDir = Projects.getBaseDirectory(omeroProject)
+
+copyFiles(omeroProjDir, omeroProjDir.getAbsolutePath(), localProjDir.getAbsolutePath())
+println "Finished !"
+return
+
+
+
+/**
+ * Copying all files and folders from a source to destination
+ * EXECPT "project.qpproj" and "project.qpproj.backup" files and "data" folder, which are very important 
+ * to not modify.
+ * 
+ */
+def copyFiles(srcDir, srcPath, destPath){
+    def srcChildFiles = srcDir.listFiles()
+    srcChildFiles.each{src ->
+        if(src.isFile()) {
+            def fname = src.getName() 
+            if(!fname.equalsIgnoreCase("project.qpproj") && !fname.equalsIgnoreCase("project.qpproj.backup")){
+                def absSrcPath = src.getAbsolutePath()
+                def absDestPath = absSrcPath.replace(srcPath, destPath)
+                File absDestFile = new File(absDestPath)
+        
+                if(absDestFile.getParentFile().exists()){
+                    println "File '"+absSrcPath+"' is copied in the existing destination"
+                    Files.copy(src.toPath(), absDestFile.toPath(), StandardCopyOption.REPLACE_EXISTING)
+                }else{
+                    println "File '"+absSrcPath+"' is copied in the newly created destination"
+                    Path path = Paths.get(absDestFile.getParent());
+                    Files.createDirectories(path);
+                    Files.copy(src.toPath(), absDestFile.toPath())
+                }
+            }
+        }else{
+            if(src.isDirectory() && !src.getName().equals("data")){
+                def nFilesSrc = src.list().length
+                copyFiles(src, srcPath, destPath)
+            }
+        }
+    }    
 }
 
 
@@ -164,3 +219,8 @@ Map<String,String> readImagesMap(imagesMapPath) {
     
     return images
 }
+
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption
