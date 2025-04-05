@@ -4,10 +4,12 @@
  * SHIFT + D to create more and move them across the image.
  * @author Olivier Burri
  * Date: 2020.09.15
+ * 
+ * Last tested on QuPath-0.4 (RG 20221207)
  */
 
 // PARAMETERS
-def size = 256 // in pixels: the size of the rectangle (width and height) to create.
+def size = 1024 // in pixels: the size of the rectangle (width and height) to create.
 
 
 // Script start
