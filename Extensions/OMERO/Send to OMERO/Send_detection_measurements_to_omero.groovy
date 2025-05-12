@@ -58,15 +58,22 @@ import qupath.lib.gui.measure.ObservableMeasurementTableData;
  * 
  **/
 
+
+
+/* Variables to modify */ 
 boolean deleteTable = false // if you want to delete ROIs on OMERO
+boolean showNotif = true
+String owner = "" // to get rois from all owners, you can set the owner to empty string, or use Utils.ALL_USERS
+
+
 
 // get the current displayed image on QuPath
 ImageServer<?> server = QP.getCurrentServer()
 
 // check if the current server is an OMERO server. If not, throw an error
 if(!(server instanceof OmeroRawImageServer)){
-	Dialogs.showErrorMessage("Measurement table sending","Your image is not from OMERO ; please use an image that comes from OMERO to use this script");
-	return
+    Dialogs.showErrorMessage("Measurement table sending","Your image is not from OMERO ; please use an image that comes from OMERO to use this script");
+    return
 }
 
 // get all detection objects
@@ -76,16 +83,10 @@ Collection<PathObject> pathObjects = QP.getDetectionObjects()
 def imageData = QP.getCurrentImageData()
 
 // send the table to OMERO as OMERO.table
-boolean deleteTable = false
-String owner = "" // to get rois from all owners, you can set the owner to empty string, or use Utils.ALL_USERS
-boolean showNotif = true
 boolean tableWasSent = OmeroRawScripting.sendDetectionMeasurementsToOmero(server, pathObjects, imageData, deleteTable, owner, showNotif);
 boolean csvWasSent = OmeroRawScripting.sendDetectionMeasurementsAsCSVToOmero(server, pathObjects, imageData, deleteTable, owner, showNotif);
 
-if(deleteTable) {
-    OmeroRawScripting.deleteDetectionFiles(server, files)
-}
-
+// display success
 if(tableWasSent && csvWasSent)
     println "Detection table sent to OMERO as OMERO.table and CSV file"
 else

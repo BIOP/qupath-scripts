@@ -60,6 +60,14 @@ import qupath.lib.scripting.QP
  * 
  **/
  
+ 
+ 
+/* Variables to modify */ 
+boolean showNotif = true
+def policy = Utils.UpdatePolicy.UPDATE_KEYS
+
+ 
+ 
 // get the current displayed image on QuPath
 ImageServer<?> server = QP.getCurrentServer()
 
@@ -69,22 +77,15 @@ if(!(server instanceof OmeroRawImageServer)){
     return
 }
 
-
 /****  send one tag  ****/
 // initialize tag
 List<String> tags = ["myNewTag"]
 
 // send tags to OMERO
-boolean showNotif = true
-boolean wasSent = OmeroRawScripting.sendTagsToOmero(tags, server, Utils.UpdatePolicy.UPDATE_KEYS, showNotif)
-
+boolean wasSent = OmeroRawScripting.sendTagsToOmero(tags, server, policy, showNotif)
 
 // display success
-if(wasSent)
-    println "Tags sent to OMERO"
-else
-
-    println "An issue occurs when trying to send tags to OMERO"
+wasSent ? println "Tags sent to OMERO" : println "An issue occurs when trying to send tags to OMERO"
 
 
 

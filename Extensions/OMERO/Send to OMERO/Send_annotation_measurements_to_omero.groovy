@@ -56,8 +56,12 @@ import qupath.lib.gui.measure.ObservableMeasurementTableData;
  **/
 
 
-// set variables
+
+/* Variables to modify */ 
 boolean deleteTable = false // if you want to delete ROIs on OMERO
+boolean showNotif = true
+String owner = "" // to get rois from all owners, you can set the owner to empty string, or use Utils.ALL_USERS
+
 
 
 // get the current displayed image on QuPath
@@ -76,15 +80,10 @@ Collection<PathObject> pathObjects = QP.getAnnotationObjects()
 def imageData = QP.getCurrentImageData()
 
 // send the table to OMERO as OMERO.table
-String owner = "" // to get rois from all owners, you can set the owner to empty string, or use Utils.ALL_USERS
-boolean showNotif = true
 boolean tableWasSent = OmeroRawScripting.sendAnnotationMeasurementsToOmero(server, pathObjects, imageData, deleteTable, owner, showNotif);
 boolean csvWasSent = OmeroRawScripting.sendAnnotationMeasurementsAsCSVToOmero(server, pathObjects, imageData, deleteTable, owner, showNotif);
 
-if(deleteTable) {
-    OmeroRawScripting.deleteAnnotationFiles(server, files)
-}
-
+// display success
 if(tableWasSent && csvWasSent)
     println "Annotation table sent to OMERO as OMERO.table and csv file"
 else

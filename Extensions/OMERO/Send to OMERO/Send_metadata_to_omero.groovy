@@ -57,13 +57,20 @@ import qupath.lib.scripting.QP
  *     4. Utils.UpdatePolicy.NO_UPDATE 
  */
 
-
-
 /**
  * Send all current metadata to OMERO as key-value pairs, 
  * attached to the current opened image.
  * 
  **/
+ 
+ 
+ 
+/* Variables to modify */ 
+boolean showNotif = true
+def tagPolicy = Utils.UpdatePolicy.UPDATE_KEYS
+def kvpPolicy = Utils.UpdatePolicy.UPDATE_KEYS
+
+
  
 // get the current displayed image on QuPath
 ImageServer<?> server = QP.getCurrentServer()
@@ -78,15 +85,9 @@ if(!(server instanceof OmeroRawImageServer)){
 def qpMetadata = QP.getProjectEntry().getMetadataMap()
 
 // send metadata to OMERO
-boolean showNotif = true
-def tagPolicy = Utils.UpdatePolicy.UPDATE_KEYS
-def kvpPolicy = Utils.UpdatePolicy.UPDATE_KEYS
 boolean wasSent = OmeroRawScripting.sendQPMetadataToOmero(qpMetadata, server, kvpPolicy, tagPolicy, showNotif)
 
 // display success
-if(wasSent)
-	println "Metadata sent to OMERO"
-else
-	println "An issue occurs when trying to send metadata to OMERO"
+wasSent ? println "Metadata sent to OMERO" : println "An issue occurs when trying to send metadata to OMERO"
 
 

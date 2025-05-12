@@ -58,6 +58,14 @@ import qupath.lib.scripting.QP
  * 
  **/
  
+ 
+ 
+/* Variables to modify */ 
+boolean showNotif = true
+def policy = Utils.UpdatePolicy.UPDATE_KEYS
+
+
+ 
 // get the current displayed image on QuPath
 ImageServer<?> server = QP.getCurrentServer()
 
@@ -68,8 +76,7 @@ if(!(server instanceof OmeroRawImageServer)){
 }
 
 // import tags from OMERO
-boolean showNotif = true
-List<String> tags = OmeroRawScripting.addTagsToQuPath(server, Utils.UpdatePolicy.UPDATE_KEYS, showNotif)
+List<String> tags = OmeroRawScripting.addTagsToQuPath(server, policy, showNotif)
 tags.each{println it}
 
 // display success

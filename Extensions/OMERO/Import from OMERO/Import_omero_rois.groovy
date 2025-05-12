@@ -47,15 +47,19 @@ import qupath.lib.scripting.QP
 */
 
 
-// set variables
-boolean removeAnnotations = true // remove current qupath annotations, with child objects (i.e. also delete detections)
-boolean showNotif = true
-
 /**
  * Import all ROIs attatch to the image on OMERO to QuPath.
  * 
  * You can change the boolean to "true" if you want to delete all ROIs that are already present on OMERO.
  **/
+
+
+
+/* Variables to modify */ 
+boolean removeAnnotations = true // remove current qupath annotations, with child objects (i.e. also delete detections)
+boolean showNotif = true
+String roisOwner = "" // to get rois from all owners, you can set the owner to empty string, or use Utils.ALL_USERS
+
 
 
 // get the current displayed image on QuPath
@@ -67,8 +71,6 @@ if(!(server instanceof OmeroRawImageServer)){
 	return
 }
 
-// get all rois from OMERO
-def roisOwner = "" // to get rois from all owners, you can set the owner to empty string, or use Utils.ALL_USERS
 Collection<PathObject> roiFromOmero = OmeroRawScripting.addROIsToQuPath(server, removeAnnotations, roisOwner, showNotif)
 
 // display the success

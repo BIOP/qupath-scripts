@@ -52,11 +52,16 @@ import qupath.lib.scripting.QP
 
 
 /**
- * Update image view settings 
-in QuPath based on OMERO channels settings.
+ * Update image view settings in QuPath based on OMERO channels settings.
  * View settings : channel display range, color and name
  * 
  **/
+
+
+/* Variables to modify */ 
+boolean showNotif = true
+ 
+ 
  
 // get the current displayed image on QuPath
 ImageServer<?> server = QP.getCurrentServer()
@@ -66,8 +71,6 @@ if(!(server instanceof OmeroRawImageServer)){
 	Dialogs.showErrorMessage("Channel settings","Your image is not from OMERO ; please use an image that comes from OMERO to use this script");
 	return
 }
-
-boolean showNotif = true
 
 // set channels display range
 OmeroRawScripting.copyOmeroChannelsDisplayRangeToQuPath(server, showNotif)

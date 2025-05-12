@@ -53,6 +53,13 @@ import qupath.lib.scripting.QP
  * View settings : channel display range, color and name
  * 
  **/
+
+
+
+/* Variables to modify */ 
+boolean showNotif = true
+ 
+ 
  
 // get the current displayed image on QuPath
 ImageServer<?> server = QP.getCurrentServer()
@@ -62,8 +69,6 @@ if(!(server instanceof OmeroRawImageServer)){
     Dialogs.showErrorMessage("Image & channel settings","Your image is not from OMERO ; please use an image that comes from OMERO to use this script");
     return
 }
-
-boolean showNotif = true
 
 // set channels display range
 boolean rangesWereSent = OmeroRawScripting.sendQuPathChannelsDisplayRangeToOmero(server, showNotif)
@@ -76,7 +81,6 @@ boolean namesWereSent = OmeroRawScripting.sendQuPathChannelsNameToOmero(server, 
 
 // set image name
 boolean imageNameWereSent = OmeroRawScripting.sendQuPathImageNameToOmero(server, showNotif)
-
 
 // display success
 if(rangesWereSent && colorsWereSent && namesWereSent && imageNameWereSent)

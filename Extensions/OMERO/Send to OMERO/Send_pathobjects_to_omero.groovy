@@ -47,8 +47,10 @@ import qupath.lib.scripting.QP
 */
 
 
-// set variables
+/* Variables to modify */ 
 boolean deleteROI = false // if you want to delete ROIs on OMERO
+boolean showNotif = true
+String roisOwner = "" // to get rois from all owners, you can set the owner to empty string, or use Utils.ALL_USERS
 
 
 /**
@@ -66,9 +68,6 @@ if(!(server instanceof OmeroRawImageServer)){
 	return
 }
 
-def roisOwner = "" // to get rois from all owners, you can set the owner to empty string, or use Utils.ALL_USERS
-boolean showNotif = true
-
 /**OPTION 1 : get annotations and send pathobjects **/
 Collection<PathObject> pathObjects = QP.getAnnotationObjects()
 boolean wasSent = OmeroRawScripting.sendPathObjectsToOmero(server, pathObjects, deleteROI, roisOwner, showNotif)
@@ -76,12 +75,8 @@ boolean wasSent = OmeroRawScripting.sendPathObjectsToOmero(server, pathObjects, 
 /**OPTION 2 : directly send annotations **/
 //boolean wasSent = OmeroRawScripting.sendAnnotationsToOmero(server, deleteROI, roisOwner, showNotif)
 
-
 // display success
-if(wasSent)
-	println "ROIs successfully sent to OMERO"
-else
-	println "An issue occurs when trying to send a ROIs to OMERO"
+wasSent ? println "ROIs successfully sent to OMERO" : println "An issue occurs when trying to send a ROIs to OMERO"
 
 
 

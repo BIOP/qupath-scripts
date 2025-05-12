@@ -64,6 +64,13 @@ import qupath.lib.scripting.QP
  * 
  **/
  
+ 
+/* Variables to modify */ 
+boolean showNotif = true
+def policy = Utils.UpdatePolicy.UPDATE_KEYS
+
+
+ 
 // get the current displayed image on QuPath
 ImageServer<?> server = QP.getCurrentServer()
 
@@ -72,9 +79,9 @@ if(!(server instanceof OmeroRawImageServer)){
     Dialogs.showErrorMessage("Tag importation","Your image is not from OMERO ; please use an image that comes from OMERO to use this script");
     return
 }
+
 // add the key-values
-boolean showNotif = true
-Map<String, String> kvps = OmeroRawScripting.addKeyValuesToQuPath(server, Utils.UpdatePolicy.UPDATE_KEYS, showNotif)
+Map<String, String> kvps = OmeroRawScripting.addKeyValuesToQuPath(server, policy, showNotif)
 kvps.each{key, value -> println("key: " + key+" ; value: "+value)}
 
 // display success
