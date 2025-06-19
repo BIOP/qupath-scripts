@@ -14,12 +14,12 @@ def project = getProject()
 
 project.getImageList().each { entry ->
     if( entry.getImageName() =~ name ) {
-
-    def hierarchy = entry.readHierarchy()
-    def objects = hierarchy.getAnnotationObjects()
-    if( objects.size() > 0 )
-        println "Adding "+objects
-        addObjects(objects)
+		def hierarchy = entry.readHierarchy()
+		def objects = hierarchy.getAnnotationObjects()
+		if( objects.size() > 0 ){
+			println "Adding "+objects
+			addObjects(objects)
+		}
     }
 }
 fireHierarchyUpdate()
