@@ -3,7 +3,8 @@
  * NOTE that measurements can only be numeric
  * 
  * @author Olivier Burri
- * @date 20221103
+ * @date 2022.11.03
+ * Last tested on QuPath-0.6.0
  */
  
 def objects = getAnnotationObjects()
@@ -17,7 +18,7 @@ objects.each{ o ->
     // Get the counter value
     id = counters.get( o.getPathClass() )
     //Set the ID measurement
-    o.getMeasurementList().putMeasurement( "ID", id )
+    o.getMeasurementList().put( "ID", id )
  
     //Increment the counter
     counters.replace( o.getPathClass(), id + 1 ) 
