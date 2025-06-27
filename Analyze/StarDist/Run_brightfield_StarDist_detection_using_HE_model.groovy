@@ -1,5 +1,6 @@
 import qupath.ext.stardist.StarDist2D
-clearDetections()
+
+removeDetections()
 
 // Specify the model file (you will need to change this!)
 var pathModel = 'C:/QuPath_Common_Data_0.3/models/he_heavy_augment.pb'

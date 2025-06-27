@@ -9,7 +9,7 @@
  * Date: 2020.09.15
  */
 
-clearDetections()
+removeDetections()
 
 // Delete all non-rectangle annotations
 def toDelete = getAllObjects().findAll{ !(it.getROI() instanceof RectangleROI ) }
