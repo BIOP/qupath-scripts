@@ -1,3 +1,5 @@
+> This branch is to save qupath scripts working on QuPath 0.5.x
+
 # QuPath Scripts
 This repository contains Scripts we found useful when using QuPath.
 
