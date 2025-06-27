@@ -6,8 +6,8 @@
  * As long as your objects are roundish, this should work
  * 
  * @author Olivier Burri
- * @date 20221103
- * Last tested on QuPath-0.3.2
+ * @date 2022.11.03
+ * Last tested on QuPath-0.6.0
  */
  
 import qupath.lib.analysis.DelaunayTools
@@ -41,7 +41,7 @@ voronois.each{ object, bounds ->
     def enlarged = PathObjects.createDetectionObject( GeometryTools.geometryToROI( intersectedGeometry, null ), object.getPathClass() )
 
     // Add as a child of the original, even tough it is larger.
-    object.addPathObject( enlarged )
+    object.addChildObject( enlarged )
 }
 
 fireHierarchyUpdate()   

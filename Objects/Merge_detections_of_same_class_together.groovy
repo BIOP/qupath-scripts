@@ -1,7 +1,11 @@
-// create new annotations by merging the detections of the same class together.
-// 
-// @author Rémy Dornier
-// date: 2025.06.27
+/**
+ * create new annotations by merging the detections of the same class together.
+ * 
+ * @author Rémy Dornier
+ * @date 2025.06.27
+ * Last tested on QuPath-0.6.0
+ */ 
+ 
 
 
 // get detections
@@ -12,7 +16,7 @@ Map<String, List<PathObject>> detectionsToMerge = new HashMap<>()
 def annots = detections.collect{ cell ->
     return PathObjects.createAnnotationObject( cell.getROI(), cell.getPathClass() )
     }
-clearDetections()
+removeDetections()
 addObjects(annots)
 
 // group annotations per class

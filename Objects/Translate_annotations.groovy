@@ -2,7 +2,7 @@
  * Translate annotations from one point to another
  * @author Rémy Dornier
  * @date 2025.06.19
- * Last tested on QuPath-0.5.1
+ * Last tested on QuPath-0.6.0
  * 
  * 
  * Description

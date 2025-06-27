@@ -2,9 +2,10 @@
  * Import QuPath Cell objects as ImageJ Rois with the possibility
  * to create a 'cytoplasm' roi for each cell
  * These are added to the Roi manager
+ * 
  * @author Olivier Burri
- * @date 20221103
- * Last tested on QuPath-0.3.2
+ * @date 2022.11.03
+ * Last tested on QuPath-0.6.0
  */
  
  // Create cytoplasm Roi and add it to the Roi Manager?

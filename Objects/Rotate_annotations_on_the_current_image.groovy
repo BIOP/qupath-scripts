@@ -6,8 +6,8 @@ import org.locationtech.jts.geom.util.AffineTransformation
  * around the image center.
  * 
  * @author Remy Dornier (from https://forum.image.sc/t/qupath-rotate-multiple-annotations/31547/4)
- * @date 2023-04-06
- * Last tested on QuPath-0.4.3
+ * @date 2023.04.06
+ * Last tested on QuPath-0.6.0
  */ 
 
 def rotation_angle = 180 // in degree
@@ -26,7 +26,7 @@ def hierarchy = getCurrentHierarchy()
 def newRoot = PathObjectTools.transformObjectRecursive(hierarchy.getRootObject(), transform, true)
 
 // clear previous un-rotated annotations
-clearAllObjects()
+removeAllObjects()
 
 // add new rotated annotations
 addObjects(newRoot.getChildObjects() as List)

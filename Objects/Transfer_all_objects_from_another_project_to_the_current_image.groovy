@@ -4,8 +4,8 @@
  * All objects in the source images should be imported into the destination image. 
  *
  * @author Olivier Burri
- * @date 20221103
- * Last tested on QuPath-0.3.2
+ * @date 2022.11.03
+ * Last tested on QuPath-0.6.0
  */
  
 // Remove objects from the active ImageEntry or keep it as is, and just add?
@@ -13,7 +13,7 @@ def deleteExisting = true
 
 // The other project that has the annotations. 
 // It should have an image with the SAME NAME as the one currently open in QuPath.
-def projectWithAnnotations = "/my/project/folder/project.qpproj"
+def projectWithAnnotations = "C:/Users/dornier/Desktop/New folder - Copy (2)/project.qpproj"
 
 //START OF SCRIPT
 def name = getProjectEntry().getImageName()
@@ -34,7 +34,7 @@ def pathObjects = otherHierarchy.getRootObject().getChildObjects()
 
 // Start transfer
 if (deleteExisting)
-    clearAllObjects()
+    removeAllObjects()
 
 // Use the transformObject to read everything in. It is borrowed from transfering objects with an affine transform
 def newObjects = []
@@ -58,8 +58,8 @@ PathObject transformObject( def pathObject, boolean copyMeasurements ) {
     def newObject = PathObjectTools.transformObject(pathObject, null, copyMeasurements)
     if ( pathObject.getName() != null ) newObject.setName( pathObject.getName() )
     // Handle child objects
-    if ( pathObject.hasChildren() ) {
-        newObject.addPathObjects(pathObject.getChildObjects().collect{ transformObject( it, copyMeasurements ) } )
+    if ( pathObject.hasChildObjects() ) {
+        newObject.addChildObjects(pathObject.getChildObjects().collect{ transformObject( it, copyMeasurements ) } )
     }
     return newObject
 }
