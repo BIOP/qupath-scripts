@@ -5,11 +5,12 @@
  * to the image entry. 
  * 
  * @author Olivier Burri
- * @date 20221103
+ * @date 2022.11.03
+ * Last tested in QuPath-0.6.0
  */
  
  
-def csvFile = Dialogs.promptForFile( "Olympus SlideProperties File", null," *.csv", ".csv" )
+def csvFile = FileChoosers.promptForFile( "Olympus SlideProperties File", new FileChooser.ExtensionFilter(".csv","*.csv") )
 
 // Start of script 
 

@@ -13,15 +13,20 @@
  * Try opening your CSV in Fiji first if you encounter errors. The separator may be incorrect. 
  * 
  * @author Olivier Burri
- * @date 20221103
+ * @date 2022.11.03
+ * Last tested on QuPath-0.6.0
  */
 
-import qupath.ext.biop.utils.Results
+
  
-def csvFile = Dialogs.promptForFile( "CSV File", null," *.csv", ".csv" )
+def csvFile = FileChoosers.promptForFile( "CSV File", new FileChooser.ExtensionFilter(".csv","*.csv") )
 
 def project = getProject()
 
-new Results().addMetadataToProject(project, csvFile)
+Results.addMetadataToProject(project, csvFile)
 
 println "Script Done"
+
+//imports
+import qupath.ext.biop.utils.Results
+import javafx.stage.FileChooser

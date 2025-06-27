@@ -10,7 +10,7 @@
  *
  * @author Remy Dornier
  * @date 2023-07-11
- * Last tested on QuPath-0.4.3
+ * Last tested on QuPath-0.6.0
  */
 
 

@@ -9,14 +9,15 @@
  *       before making the SVG and restored at the end
  *
  * @author Olivier Burri
- * 2022.09.27
+ * @date 2022.09.27
+ * Last tested on QuPath-0.6.0
  */
 
 //////// SCRIPT SETTINGS ////////
 //////// --------------- ////////
 
 // Classification to filter and export
-def selectedClass = "S1HL"
+def selectedClass = "Small"
 
 // Raster downsample
 def downsample = 8
@@ -55,7 +56,7 @@ def cells = getDetectionObjects()
 def annots = cells.collect{ cell ->
     return PathObjects.createAnnotationObject( cell.getROI(), cell.getPathClass() )
     }
-clearDetections()
+removeDetections()
 
 addObjects(annots)
 

@@ -9,7 +9,8 @@
  * WARNING: This has very large memory requirements. Make sure you have lots of RAM or limit the number of cores 
  *
  * @author Olivier Burri
- * @date 20221103
+ * @date 2022.11.03
+ * Last tested on QuPath-0.6.0
  */
 import groovyx.gpars.GParsPool
 
@@ -28,7 +29,7 @@ GParsPool.withPool(6) {
 		
         println file
 		
-        def cmd = "C:/QuPath-0.3.2/QuPath-0.3.2 (console).exe"
+        def cmd = "C:/QuPath-0.6.0/QuPath-0.6.0 (console).exe"
         def outputFile = new File (folder, file.getName() + "_info.txt")
         def pb = new ProcessBuilder(cmd, "convert-ome", file.getAbsolutePath(), new File( convertedFolder, file.getName()+".ome.tiff").getAbsolutePath(), "-y", "2.0", "-p", "-t", "1")
         				.redirectErrorStream(true)

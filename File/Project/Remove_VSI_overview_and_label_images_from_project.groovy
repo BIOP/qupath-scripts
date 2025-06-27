@@ -6,8 +6,9 @@
  *       Delete the 'project.qpproj' and remove the last extension of `project.qpproj.backup`
  * 
  * @author: Olivier Burri
- * @date: 20200710
+ * @date: 2020.07.10
  * Last modification: Simplified code and made it compatible with QuPath 0.2.1
+ * Last tested on QuPath0.6.0
  */
 
 def project = getProject()

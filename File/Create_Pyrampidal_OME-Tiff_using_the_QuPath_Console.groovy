@@ -7,7 +7,8 @@
  * Made for Windows PCs
  *
  * @author Olivier Burri
- * @date 20221103
+ * @date 2022.11.03
+ * Last tested on QuPath-0.6.0
  */
 
 // What is the extension of images being converted? For filtering the input folder
@@ -17,10 +18,10 @@ def imageExtension = "ndpi"
 
 // Figure out where QuPath is to locate the executable. If we are running from within QuPath, this line works
 def qpDirectory = new File( System.getProperty( "user.dir" ) )
-def qpExeFile = "QuPath-0.3.2 (console).exe"
+def qpExeFile = "QuPath-0.6.0 (console).exe"
 
 // Request where the images to convert are
-def folder = Dialogs.promptForDirectory( qpDirectory )
+def folder = FileChoosers.promptForDirectory( "Select folder", qpDirectory )
 
 // Create a 'converted' folder to store the new ome-tiff images
 def convertedFolder = new File( folder.getParent(), "converted" )
@@ -55,3 +56,6 @@ fileList.each{ file ->
 }
 
 println "Script Done"
+
+// imports
+import qupath.fx.dialogs.FileChoosers
