@@ -4,8 +4,8 @@
  * as well as the same displays and colors. 
  *
  * @author Olivier Burri
- * @date 20221103
- * Last tested on QuPath-0.3.2
+ * @date 2022.11.03
+ * Last tested on QuPath-0.6.0
  */
  
 setImageType('FLUORESCENCE')

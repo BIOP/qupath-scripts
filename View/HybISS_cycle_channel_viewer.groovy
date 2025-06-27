@@ -1,3 +1,12 @@
+
+/*
+ * Hybiss channel viewer
+ *
+ * @author Olivier Burri
+ * Date: 2022.12.21
+ * Last tested on QuPath-0.6.0
+ */
+
 def channels = getCurrentViewer().getImageDisplay().availableChannels()
 
 // The channel names are structured as Fluorophore_Cycle#, ex. "TRITC_Cycle1 (C3)"

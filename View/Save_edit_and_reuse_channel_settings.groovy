@@ -7,10 +7,9 @@
  *
  * @author Olivier Burri
  * Date: 2022.12.21
+ * Last tested on QuPath-0.6.0
  */
- 
-import qupath.ext.biop.utils.Channels
-import qupath.lib.gui.dialogs.Dialogs;
+
 
 // Pick up the current channel settings
 def currentSettings = Channels.getCurrentChannelSettings()
@@ -45,3 +44,7 @@ Dialogs.showConfirmDialog("Reverting", "Reverting to Original Channels");
 
 // Reload original settings
 Channels.setChannelSettings(currentSettings)
+
+//imports
+import qupath.ext.biop.utils.Channels
+import qupath.fx.dialogs.Dialogs
