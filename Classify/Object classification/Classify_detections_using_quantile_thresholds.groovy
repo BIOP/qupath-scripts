@@ -10,7 +10,6 @@
  * Date: 2022.11.03
  */
 
-import qupath.lib.classifiers.object.ObjectClassifiers
 
 def pathObjects = getDetectionObjects() // or getCellObjects()
 
@@ -71,7 +70,7 @@ class QuantileClassifierBuilder {
         def negClass = getPathClass( this.pathClass + "-" )
         
         // Determine the thresholds based on the MAD and k
-        def allMeasurements = pathObjects.collect{ p -> p.getMeasurementList().getMeasurementValue( measurement ) }.findAll{ m -> !Double.isNaN( m ) }
+        def allMeasurements = pathObjects.collect{ p -> p.getMeasurementList().get( measurement ) }.findAll{ m -> !Double.isNaN( m ) }
         
         def threshold = quantileBasedThr( allMeasurements, quantile, k )
         
@@ -108,5 +107,5 @@ class QuantileClassifierBuilder {
 }
 
 
-  
-
+// imports
+import qupath.lib.classifiers.object.ObjectClassifiers

@@ -17,7 +17,7 @@ def distanceFunction = new EuclideanDistance()
 
 // Collect and normalize
 def allValues = measurements.collect{ m ->
-    detections.collect{ d -> d.getMeasurementList().getMeasurementValue( m ) } as double[]
+    detections.collect{ d -> d.getMeasurementList().get( m ) } as double[]
 }
 
 // Perform Normalization
@@ -36,7 +36,7 @@ def map = new LinkedHashMap<ArrayList<Double>, String>( centroids.size() )
     // Find nearest cluster 
     def centroid = centroids.min{ distanceFunction.compute( it as double[], value.getPoint() ) }
     
-    detection.setPathClass( getPathClass(map.get( centroid )) )
+    detection.setClassification( map.get( centroid ) )
 }
 
 

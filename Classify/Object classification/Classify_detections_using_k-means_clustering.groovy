@@ -25,7 +25,7 @@ def kmeans = new KMeansPlusPlusClusterer( k, maxIterations, distanceFunction, ra
 
 // Collect and normalize
 def allValues = measurements.collect{ m ->
-    detections.collect{ d -> d.getMeasurementList().getMeasurementValue( m ) } as double[]
+    detections.collect{ d -> d.getMeasurementList().get( m ) } as double[]
 }
 
 // Perform Normalization
@@ -51,7 +51,7 @@ def map = new LinkedHashMap<CentroidCluster, String>( centroids.size() )
     // Find nearest cluster 
     def centroid = centroids.min{ distanceFunction.compute( it.getCenter().getPoint(), value.getPoint() ) }
     
-    detection.setPathClass( getPathClass(map.get( centroid )) )
+    detection.setClassification( map.get( centroid ) )
 }
 
 // Print the result

@@ -67,7 +67,7 @@ class MADClassifierBuilder {
         def negClass = getPathClass( this.pathClass + "-" )
         
         // Determine the thresholds based on the MAD and k
-        def allMeasurements = pathObjects.collect{ p -> p.getMeasurementList().getMeasurementValue( measurement ) }.findAll{ m -> !Double.isNaN( m ) } as double[]
+        def allMeasurements = pathObjects.collect{ p -> p.getMeasurementList().get( measurement ) }.findAll{ m -> !Double.isNaN( m ) } as double[]
         def median = getMedian( allMeasurements )
 
         // Subtract median & get absolute value

@@ -1,8 +1,10 @@
 /*
  * Classify objects based on the pixel classifier class they overlap with
  * You need objects and a valid pixel classifier
+ * 
  * @author Olivier Burri
  * Date: 2022.11.03
+ * Last tested on QuPath-0.6.0
  */
  
 def detections = getDetectionObjects()
