@@ -49,7 +49,7 @@ project.getImageList().each { entry ->
 
                 // Add metadata here
                 line.each{ key, value ->
-                    entry.putMetadataValue(key, value)
+                    entry.getMetadata().put(key, value)
                 }
             }
         }
