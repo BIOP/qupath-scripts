@@ -7,18 +7,19 @@
  * - The name of the image within the QuPath-OMERO project must include the name of the serie (for fileset images)
  * 
  * Step by step tuto
- * 1. Open an empty project
- * 2. Open this script
- * 3. Change the "omeroProjectPath" variable with the path to your omero-qupath project containing omero images
- * 4. Change the "localDownloadPath" variable with the path where you want to download images.
- * 4. Run the script
+ * 1. Connect to OMERO (Extension -> OMERO -> Browse server -> https://omero.epfl.ch)
+ * 2. Open an empty project
+ * 3. Open this script
+ * 4. Change the "omeroProjectPath" variable with the path to your omero-qupath project containing omero images
+ * 5. Change the "localDownloadPath" variable with the path where you want to download images.
+ * 6. Run the script
  * 
- * 5. For MAC users, if your project is located on a server, then the path should begin with /Volumes/...
+ * NOTE: For MAC users, if your project is located on a server, then the path should begin with /Volumes/...
  *
  * @author Remy Dornier
  * @date 2023-07-10
- * Last tested on QuPath-0.5.1
- * version v3.0
+ * Last tested on QuPath-0.6.0
+ * version v4.0
  * 
  * REQUIRED DEPENDENCY : omero-ij.5.8.6-all.jar (previous versions won't work to download vsi files)
  * 
@@ -29,6 +30,8 @@
  * 2023.09.04 : use the up-to-date dependency - omero-ij.5.8.2-all.jar --v2.0
  * 2025.02.17 : Copy the rest of the omero project in the local project
  * 2025.02.17 : update dependencies to omero-ij.5.8.6-all.jar --v3.0
+ * 2025.06.30 : Update for QuPath-0.6.0 --v4.0
+ * 2025.06.30 : Migration towards qupath-extension-omero --v4.0
  */
  
  
@@ -40,9 +43,13 @@
 
 
 // The omero project path that has the annotations. 
-def omeroProjectPath = "D:\\Remy\\QuPath-OMERO\\Migration Local-OMERO\\omeroProject\\project.qpproj"
+def omeroProjectPath = "D:\\Remy\\QuPath\\Migration Local-OMERO\\OmeroProject\\project.qpproj"
 // Path of the folder where to download the images
-def localDownloadPath = "D:\\Remy\\QuPath-OMERO\\Migration Local-OMERO\\newLocalProj\\images"
+def localDownloadPath = "D:\\Remy\\QuPath-OMERO\\Migration Local-OMERO\\localProject\\images"
+// OMERO host for ICE api
+def host = "omero-server.epfl.ch"
+// OMERO port fo ICE API
+def port = 4064
 
 
 /*************************************************************
@@ -61,164 +68,198 @@ def qupath = QPEx.getQuPath()
 def filesetOmeroImagesMap = new HashMap<>()
 def qpOmeroImageList = omeroProject.getImageList()
 
-// list all filesets
-println "Read OMERO project from : "+omeroProjectPath
-qpOmeroImageList.each{ qpOmeroImage->
-
-    // read image in omero qupath project
-    def imageData = qpOmeroImage.readImageData()
-    def server = imageData.getServer()
-    def client = server.getClient()
-    def imageId = server.getId()
-    
-    // read image on omero and get its fileset
-    long filesetId = OmeroRawTools.readOmeroImage(client, imageId).getFilesetId()
-    
-    // add the image to the list of filesets
-    if(filesetOmeroImagesMap.containsKey(filesetId)) {
-        List<String> value = filesetOmeroImagesMap.get(filesetId)
-        value.add(qpOmeroImage)
-        filesetOmeroImagesMap.replace(filesetId, value)
-    } else {
-        List<String> value = new ArrayList()
-        value.add(qpOmeroImage)
-        filesetOmeroImagesMap.put(filesetId, value)
-    }
-    
-    // close the hidden open server
-    server.close()
+if(qpOmeroImageList.isEmpty()) {
+   println "No images on the OMERO project to download ; stop here the script execution"
+   return
 }
 
-println "" + qpOmeroImageList.size() + " omero-qupath entries were read from the qupath project "
-println "" + filesetOmeroImagesMap.size() + " original files will be downloaded from omero"
+// setup the ICE OMERO server
+def gateway = new Gateway(new IceLogger())
+def ctx = null
+def omeroClient = qpOmeroImageList.get(0).readImageData().getServer().getClient()
+def sessionId = omeroClient.getApisHandler().getSessionUuid().get()
+def cred = new LoginCredentials(sessionId, sessionId, host, port)        
+def connectedUser = gateway.connect(cred)
 
-def filesetLocalImagesMap = new HashMap<>()
-filesetOmeroImagesMap.keySet().each{filesetId ->
-    def qpOmeroImage = filesetOmeroImagesMap.get(filesetId).get(0)
-    
-    println "//////// Working on image "+qpOmeroImage.getImageName()+" ////////////"
-    
-    // read image in omero qupath project
-    def omeroImageData = qpOmeroImage.readImageData()
-    def omeroImageServer = omeroImageData.getServer()
-    def omeroClient = omeroImageServer.getClient()
-    def omeroImageId = omeroImageServer.getId()
-    
-    // close the hidden open server
-    omeroImageServer.close()
-    
-    // download the image from OMERO
-    println "Download from OMERO"
-    //def files = downloadImage(omeroClient, localDownloadPath, omeroImageId)
-    def files = omeroClient.getGateway().getFacility(TransferFacility.class).downloadImage(omeroClient.getContext(), localDownloadPath, omeroImageId);
-    println files
-    println files.size()
-    println files.get(0).getParentFile().getParentFile().getAbsolutePath()
-    println localDownloadPath
-    // filter to get only the image file (and not files in sub-folders)
-    def localImagePath = files.stream().filter(e->e.isFile() && e.getParentFile().getParentFile().getAbsolutePath().equals(localDownloadPath)).collect(Collectors.toList()).get(0).getAbsolutePath()
-    println "Local image path : "+localImagePath
-    
-    // add image to the QuPath project and to the map of local imageEntries.
-    print "Add to qupath project"
-    filesetLocalImagesMap.put(filesetId, toQuPath(qupath, localImagePath))
-}
-
- println "*** Transfer data from omero project to current project ***"
-
-// loop over all local ImageEntries
-filesetLocalImagesMap.keySet().each{filesetId ->
-    def qpOmeroImages = filesetOmeroImagesMap.get(filesetId)
-    def qpLocalImages = filesetLocalImagesMap.get(filesetId)
-  
-    qpLocalImages.each{localImageEntry ->
-        println "////////////// Working on local image "+localImageEntry.getImageName() + " ////////////////"
-        def matchedOmeroEntry = null
+if(gateway.isConnected()) {
+    try{
+        // setup the OMERO context
+        ctx = new SecurityContext(connectedUser.getGroupId())
+        ctx.setExperimenter(connectedUser);
+        ctx.setServerInformation(cred.getServer());
         
-        // if the image on OMERO is not a fileset, use the omero entry as is
-        if(qpLocalImages.size() == 1) {
-            println "Single image" 
-            matchedOmeroEntry = qpOmeroImages.get(0)
-        } else {
-            println "Fileset image" 
+        // list all filesets
+        println "Read OMERO project from : "+omeroProjectPath
+        qpOmeroImageList.each{ qpOmeroImage->
+            // read image in omero qupath project
+            def imageData = qpOmeroImage.readImageData()
+            def server = imageData.getServer()
+            def client = server.getClient()
+            def imageId = server.getId()
+             
+            // read image on omero and get its fileset
+            long filesetId = gateway.getFacility(BrowseFacility.class).getImage(ctx, imageId).getFilesetId()
             
-            // if fileset, then extract the name of serie (from the local entry) and
-            // find the corresponding omero entry
-            def localSerieName = localImageEntry.getImageName()
-            def localTokens = localSerieName.split(" - ")
-            
-            def nameToMatch = ""
-            if(localTokens.length > 1)
-                nameToMatch = localTokens[-1].toLowerCase()
-            else if (localTokens.length > 0)
-                nameToMatch = localTokens[0].toLowerCase()
-            
-            println "Need to match '"+ nameToMatch + "' in one of the omero entries"
-            
-            if(!nameToMatch.isEmpty()) {
-                def matchedFiles = qpOmeroImages.collect{e-> if(e.getImageName().toLowerCase().contains(nameToMatch)) return e}
-                matchedFiles = matchedFiles - null
-                println "Matched files "+matchedFiles
-                if(matchedFiles.size() > 0 && matchedFiles.get(0) != null) {
-                    println "Found one !" 
-                    matchedOmeroEntry = matchedFiles.get(0)
-                } else {
-                  println "WARNING : No omero entry contains '"+nameToMatch+"'"
-                }
+            // add the image to the list of filesets
+            if(filesetOmeroImagesMap.containsKey(filesetId)) {
+                List<String> value = filesetOmeroImagesMap.get(filesetId)
+                value.add(qpOmeroImage)
+                filesetOmeroImagesMap.replace(filesetId, value)
             } else {
-                println "WARNING : the serie name to match is empty"
+                List<String> value = new ArrayList()
+                value.add(qpOmeroImage)
+                filesetOmeroImagesMap.put(filesetId, value)
+            }
+            
+            // close the hidden open server
+            server.close()
+        } 
+        
+        println "" + qpOmeroImageList.size() + " omero-qupath entries were read from the qupath project "
+        println "" + filesetOmeroImagesMap.size() + " original files will be downloaded from omero"
+        
+        def filesetLocalImagesMap = new HashMap<>()
+        filesetOmeroImagesMap.keySet().each{filesetId ->
+            def qpOmeroImage = filesetOmeroImagesMap.get(filesetId).get(0)
+            
+            println "//////// Working on image "+qpOmeroImage.getImageName()+" ////////////"
+            
+            // read image in omero qupath project
+            def omeroImageData = qpOmeroImage.readImageData()
+            def omeroImageServer = omeroImageData.getServer()
+            def omeroImageId = omeroImageServer.getId()
+            
+            // close the hidden open server
+            omeroImageServer.close()
+            
+            // download the image from OMERO
+            println "Downloading from OMERO"
+            def files = gateway.getFacility(TransferFacility.class).downloadImage(ctx, localDownloadPath, omeroImageId);
+            println files
+            println files.size()
+            println files.get(0).getParentFile().getParentFile().getAbsolutePath()
+            println localDownloadPath
+            // filter to get only the image file (and not files in sub-folders)
+            def localImagePath = files.stream().filter(e->e.isFile() && e.getParentFile().getParentFile().getAbsolutePath().equals(localDownloadPath)).collect(Collectors.toList()).get(0).getAbsolutePath()
+            println "Local image path : "+localImagePath
+            
+            // add image to the QuPath project and to the map of local imageEntries.
+            print "Add to qupath project"
+            filesetLocalImagesMap.put(filesetId, toQuPath(qupath, localImagePath))
+        }
+        
+         println "*** Transfer data from omero project to current project ***"
+        
+        // loop over all local ImageEntries
+        filesetLocalImagesMap.keySet().each{filesetId ->
+            def qpOmeroImages = filesetOmeroImagesMap.get(filesetId)
+            def qpLocalImages = filesetLocalImagesMap.get(filesetId)
+          
+            qpLocalImages.each{localImageEntry ->
+                println "////////////// Working on local image "+localImageEntry.getImageName() + " ////////////////"
+                def matchedOmeroEntry = null
+                
+                // if the image on OMERO is not a fileset, use the omero entry as is
+                if(qpLocalImages.size() == 1) {
+                    println "Single image" 
+                    matchedOmeroEntry = qpOmeroImages.get(0)
+                } else {
+                    println "Fileset image" 
+                    
+                    // if fileset, then extract the name of serie (from the local entry) and
+                    // find the corresponding omero entry
+                    def localSerieName = localImageEntry.getImageName()
+                    def localTokens = localSerieName.split(" - ")
+                    
+                    def nameToMatch = ""
+                    if(localTokens.length > 1)
+                        nameToMatch = localTokens[-1].toLowerCase()
+                    else if (localTokens.length > 0)
+                        nameToMatch = localTokens[0].toLowerCase()
+                    
+                    println "Need to match '"+ nameToMatch + "' in one of the omero entries"
+                    
+                    if(!nameToMatch.isEmpty()) {
+                        def matchedFiles = qpOmeroImages.collect{e-> if(e.getImageName().toLowerCase().contains(nameToMatch)) return e}
+                        matchedFiles = matchedFiles - null
+                        println "Matched files "+matchedFiles
+                        if(matchedFiles.size() > 0 && matchedFiles.get(0) != null) {
+                            println "Found one !" 
+                            matchedOmeroEntry = matchedFiles.get(0)
+                        } else {
+                          println "WARNING : No omero entry contains '"+nameToMatch+"'"
+                        }
+                    } else {
+                        println "WARNING : the serie name to match is empty"
+                    }
+                }
+                
+                if(matchedOmeroEntry != null) {
+                    
+                    // get omeroProject image's name
+                    def name = matchedOmeroEntry.getImageName()
+                    println 'Opening Hierarchy in omero project for ' + name
+                    
+                    // get omeroProject image's hierarchy and pathObjects
+                    def omeroHierarchy = matchedOmeroEntry.readHierarchy()
+                    def omeroPathObjects = omeroHierarchy.getRootObject().getChildObjects()
+                    
+                    // read local image data and hierarchy
+                    println 'Opening Hierarchy in current project for ' + localImageEntry.getImageName()
+                    def localImageData = localImageEntry.readImageData()
+                    def localHierarchy = localImageData.getHierarchy()
+                    
+                    print "Transfer annotations from omero project to current project"
+                    // Use the transformObject to read everything in. It is borrowed from transfering objects with an affine transform
+                    def localNewObjects = []
+                    for (pathObject in omeroPathObjects) {
+                        localNewObjects << transformObject(pathObject, true)
+                    }
+                
+                    // omero hierarchy to local hierarchy
+                    localHierarchy.addObjects(localNewObjects)
+                    localImageEntry.saveImageData(localImageData)
+                    fireHierarchyUpdate(localHierarchy)
+                    
+                    // set metadata on local image from omero image
+                    print "Transfer metadata from omero project to current project"
+                    def omeroMetadata = matchedOmeroEntry.getMetadata()
+                    def localMetadata = matchedOmeroEntry.getMetadata()
+                    omeroMetadata.each{localMetadata.put(it.getKey(), it.getValue())}
+                
+                    // close the hidden server
+                    localImageData.getServer().close()
+                    
+                    println 'Done! for image  '+name
+                } else {
+                    println "No omero entry can be read. Skip this one"
+                }
             }
         }
         
-        if(matchedOmeroEntry != null) {
-            
-            // get omeroProject image's name
-            def name = matchedOmeroEntry.getImageName()
-            println 'Opening Hierarchy in omero project for ' + name
-            
-            // get omeroProject image's hierarchy and pathObjects
-            def omeroHierarchy = matchedOmeroEntry.readHierarchy()
-            def omeroPathObjects = omeroHierarchy.getRootObject().getChildObjects()
-            
-            // read local image data and hierarchy
-            println 'Opening Hierarchy in current project for ' + localImageEntry.getImageName()
-            def localImageData = localImageEntry.readImageData()
-            def localHierarchy = localImageData.getHierarchy()
-            
-            print "Transfer annotations from omero project to current project"
-            // Use the transformObject to read everything in. It is borrowed from transfering objects with an affine transform
-            def localNewObjects = []
-            for (pathObject in omeroPathObjects) {
-                localNewObjects << transformObject(pathObject, true)
-            }
         
-            // omero hierarchy to local hierarchy
-            localHierarchy.addObjects(localNewObjects)
-            localImageEntry.saveImageData(localImageData)
-            fireHierarchyUpdate(localHierarchy)
-            
-            // set metadata on local image from omero image
-            print "Transfer metadata from omero project to current project"
-            def metadata = matchedOmeroEntry.getMetadataMap()
-            metadata.each{localImageEntry.putMetadataValue(it.getKey(), it.getValue())}
+        println "Copying all files from qp local project to qp omero project..."
+        def localProjDir = Projects.getBaseDirectory(getProject())
+        def omeroProjDir = Projects.getBaseDirectory(omeroProject)
         
-            // close the hidden server
-            localImageData.getServer().close()
-            
-            println 'Done! for image  '+name
-        } else {
-            println "No omero entry can be read. Skip this one"
+        copyFiles(omeroProjDir, omeroProjDir.getAbsolutePath(), localProjDir.getAbsolutePath())
+        println "Finished !"
+    }catch(Exception e) {
+        println "An error occured during the script execution"
+        println e
+        println e.printStackTrace()
+    }finally{ 
+        println "Closing gateway connection..."
+        gateway.disconnect()
+        if(ctx != null) {
+            ctx = new SecurityContext(-1)
+            ctx.setExperimenter(new ExperimenterData());
         }
     }
+    println "End of script"
+}else {
+   println "Cannot connect to OMERO via the ICE API" 
 }
-
-
-println "Copying all files from qp local project to qp omero project..."
-def localProjDir = Projects.getBaseDirectory(getProject())
-def omeroProjDir = Projects.getBaseDirectory(omeroProject)
-
-copyFiles(omeroProjDir, omeroProjDir.getAbsolutePath(), localProjDir.getAbsolutePath())
-println "Finished !"
 return
 
 
@@ -375,10 +416,12 @@ PathObject transformObject( def pathObject, boolean copyMeasurements ) {
  * imports
  */
 import omero.gateway.facility.TransferFacility
-import qupath.ext.biop.servers.omero.raw.*
-import qupath.ext.biop.servers.omero.raw.client.*
-import qupath.ext.biop.servers.omero.raw.command.*
-import qupath.ext.biop.servers.omero.raw.utils.*
+import omero.gateway.facility.BrowseFacility
+import qupath.ext.omero.core.pixelapis.ice.IceLogger
+import omero.gateway.Gateway;
+import omero.gateway.LoginCredentials;
+import omero.gateway.SecurityContext;
+import omero.gateway.model.ExperimenterData;
 import java.util.stream.Collectors
 import java.io.File;
 import java.util.ArrayList;

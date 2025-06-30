@@ -13,12 +13,13 @@
  *
  * @author Olivier Burri & Remy Dornier
  * @date 2023-04-05
- * Last tested on QuPath-0.5.1
+ * Last tested on QuPath-0.6.0
  * 
  * History 
  *  - 2023.07.05 : close the imageServer to release OMERO ressources
  *  - 2025.02.17 : Copy the rest of the local project in the OMERO project
  *  - 2025.02.17 : Dissociate metadata and object deletion
+ *  - 2025.06.30 : Update for QuPath-0.6.0
  */
  
  
@@ -77,7 +78,7 @@ getProject().getImageList().each { omeroImage->
         // delete omero image hierarchy & metadata
     if (deleteExistingMetadata) {
         println 'Delete previous metadata '
-        omeroImage.clearMetadata();
+        omeroImage.getMetadata().clear();
     }
     
     // Use the transformObject to read everything in. It is borrowed from transfering objects with an affine transform
@@ -92,8 +93,9 @@ getProject().getImageList().each { omeroImage->
     fireHierarchyUpdate(omeroHierarchy)
     
     // set metadata on omero image
-    def metadata = localEntry.getMetadataMap()
-    metadata.each{omeroImage.putMetadataValue(it.getKey(), it.getValue())}
+    def localMetadata = localEntry.getMetadata()
+    def omeroMetadata = omeroImage.getMetadata()
+    localMetadata.each{omeroMetadata.put(it.getKey(), it.getValue())}
     
     // close the hidden imageServer
     omeroImageData.getServer().close()

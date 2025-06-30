@@ -23,11 +23,12 @@
  *
  * @author Remy Dornier
  * @date 2023-07-11
- * Last tested on QuPath-0.5.1
+ * Last tested on QuPath-0.6.0
  * 
  * History 
  *  - 2025.02.17 : Copy the rest of the local project in the OMERO project
  *  - 2025.02.17 : Dissociate metadata and object deletion
+ *  - 2025.06.30 : Update for QuPath-0.6.0
  * 
  */
  
@@ -47,7 +48,7 @@ def deleteExistingMetadata = false
 def omeroProjectPath = "D:\\Remy\\QuPath\\Migration Local-OMERO\\OmeroProject\\project.qpproj"
 
 // Image name in the omero project must match the ones in the local project
-def imagesMapPath = "D:\\Remy\\QuPath\\Migration Local-OMERO\\Correspondance-local-omero.csv"
+def imagesMapPath = "D:\\Remy\\QuPath-OMERO\\Migration Local-OMERO\\Correspondance-local-omero.csv"
 
 
 /*************************************************************
@@ -99,13 +100,13 @@ imagesMap.keySet().each{localImageName ->
     
     // delete lcoal image hierarchy & metadata
     if (deleteExistingObjects) {
-        println 'Delete previous hierarchy '
-        omeroHierarchy.clearAll();
+        println 'Delete local previous hierarchy '
+        localHierarchy.clearAll();
     }
         // delete omero image hierarchy & metadata
     if (deleteExistingMetadata) {
-        println 'Delete previous metadata '
-        omeroImage.clearMetadata();
+        println 'Delete local previous metadata '
+        localImageEntry.getMetadata().clear();
     }
     
     print "Transfer annotations from omero project to current project"
@@ -122,8 +123,9 @@ imagesMap.keySet().each{localImageName ->
     
     // set metadata on local image from omero image
     print "Transfer metadata from omero project to current project"
-    def metadata = omeroImageEntry.getMetadataMap()
-    metadata.each{localImageEntry.putMetadataValue(it.getKey(), it.getValue())}
+    def omeroMetadata = omeroImageEntry.getMetadata()
+    def localMetadata = localImageEntry.getMetadata()
+    omeroMetadata.each{localMetadata.put(it.getKey(), it.getValue())}
 
     // close the hidden server
     localImageData.getServer().close()
@@ -214,7 +216,7 @@ Map<String,String> readImagesMap(imagesMapPath) {
            }
        }
     } else {
-       println "The file "+ file.getName() + "does not exists in "+imagesMapPath
+       println "The file "+ file.getName() + " does not exists in "+imagesMapPath
     }
     
     return images
