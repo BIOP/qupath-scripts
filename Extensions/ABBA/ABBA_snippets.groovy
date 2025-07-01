@@ -16,7 +16,7 @@
 // See forum post https://forum.image.sc/t/qupath-script-to-restrict-cell-detection-to-several-sub-regions-of-the-brain/71707/3 for images
 
 // 1. To clear all objects (take care, it also clear cells (detection objects)!)
-clearAllObjects()
+removeAllObjects()
 
 // 2. To clear all annotations objects:
 removeObjects(getAnnotationObjects(), false) // last argument = keep child objects ?
