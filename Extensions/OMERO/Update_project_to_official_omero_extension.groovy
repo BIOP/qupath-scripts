@@ -14,7 +14,7 @@
  * 
  * NOTE: For MAC users, if your project is located on a server, then the path should begin with /Volumes/...
  * 
- * @author Remy Dornier, Nicolas Chiaruttini, Claude.ai
+ * @author Remy Dornier
  * @date 2025.06.30
  * Last tested on QuPath-0.6.0
  * 
@@ -32,11 +32,11 @@ import com.google.gson.*
  * 
  ***********************************************************/
 // The omero project path created using the qupath-extension-biop-omero
-def oldOmeroProjectPath = "F:/IAGitLab/yllza.jasiqi_UPDANGELO/aligncycles/qupath_project_converted/project.qpproj"
+def oldOmeroProjectPath = "F:/.../project.qpproj"
 // omero host pointing to the omero server
 def oldIceServerHost = "omero-server.epfl.ch"
 // omero host pointing to the webclient
-def newWebServerHost = "omero.epfl.ch"
+def newWebServerHost = "omero-server.epfl.ch"
 // the OMERO server port used in qupath-extension-biop-omero
 def oldOmeroServerPort = 4064
 
@@ -75,15 +75,25 @@ def migratedCount = 0
 
 // Recursive function to process nested serverBuilders
 def processServerBuilder = null
-processServerBuilder = { jsonElement ->
+processServerBuilder = { jsonElement, depth = 0 ->
+    def indent = "  " * depth
+    
     if (jsonElement.isJsonObject()) {
         def jsonObj = jsonElement.getAsJsonObject()
+        
+        // Debug: print what we're processing
+        if (jsonObj.has("builderType")) {
+            println "${indent}Processing object with builderType: ${jsonObj.get('builderType').getAsString()}"
+        }
+        if (jsonObj.has("providerClassName")) {
+            println "${indent}Found providerClassName: ${jsonObj.get('providerClassName').getAsString()}"
+        }
         
         // Check if this object IS a serverBuilder that needs migration
         if (jsonObj.has("providerClassName")) {
             def providerClassName = jsonObj.get("providerClassName").getAsString()
             if (providerClassName.equals(oldServerProvider)) {
-                println "    Found nested serverBuilder to migrate"
+                println "${indent}*** MIGRATING serverBuilder ***"
                 
                 // Update provider class name
                 jsonObj.addProperty("providerClassName", newServerProvider)
@@ -95,7 +105,7 @@ processServerBuilder = { jsonElement ->
                     jsonObj.addProperty("uri", newUri)
                     
                     if (!oldUri.equals(newUri)) {
-                        println "      Updated URI: ${oldUri} -> ${newUri}"
+                        println "${indent}    Updated URI: ${oldUri} -> ${newUri}"
                     }
                 }
                 
@@ -110,19 +120,37 @@ processServerBuilder = { jsonElement ->
                 
                 jsonObj.add("args", args)
                 migratedCount++
+                println "${indent}    Migration completed!"
+            } else {
+                println "${indent}Skipping providerClassName: ${providerClassName}"
             }
         }
         
         // Now recursively process ALL properties of this object
         jsonObj.entrySet().each { entry ->
+            def key = entry.key
             def value = entry.value
-            processServerBuilder(value)
+            println "${indent}Recursing into property: ${key}"
+            processServerBuilder(value, depth + 1)
         }
         
     } else if (jsonElement.isJsonArray()) {
         def jsonArray = jsonElement.getAsJsonArray()
-        jsonArray.each { arrayElement ->
-            processServerBuilder(arrayElement)
+        println "${indent}Processing array with ${jsonArray.size()} elements"
+        jsonArray.eachWithIndex { arrayElement, index ->
+            println "${indent}Processing array element ${index}"
+            processServerBuilder(arrayElement, depth + 1)
+        }
+    } else {
+        // Primitive value - nothing to process
+        if (jsonElement.isJsonPrimitive()) {
+            def primitive = jsonElement.getAsJsonPrimitive()
+            if (primitive.isString()) {
+                def str = primitive.getAsString()
+                if (str.length() < 100) { // Only log short strings to avoid spam
+                    println "${indent}Primitive string: ${str}"
+                }
+            }
         }
     }
 }
@@ -152,7 +180,8 @@ try {
         for (int i = 0; i < imagesArray.size(); i++) {
             println "  Processing image ${i + 1}/${totalImages}"
             def imageElement = imagesArray.get(i)
-            processServerBuilder(imageElement)
+            processServerBuilder(imageElement, 0)
+            println "  Completed image ${i + 1}/${totalImages}\n"
         }
     } else {
         println "No images found in project file"
