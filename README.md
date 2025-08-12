@@ -2,6 +2,8 @@
 **This repo is now archived and its content has been integrated into the [QuPath-BIOP extension](https://github.com/BIOP/qupath-extension-biop) in order to avoid complexity with catalog installation.
 This repo will no longer be maintained. Scripts are now accessible under `Extensions -> BIOP -> scripts`**
 
+**Please consider using the QuPath-BIOP extension instead to benefit from latest scripts / fixes**
+
 ## QuPath Scripts
 This repository contains Scripts we found useful when using QuPath.
 
